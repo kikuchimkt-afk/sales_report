@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ベストワン藍住校 売上分析レポート 2015-2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0f1117;
+  --bg-secondary: #1a1d2e;
+  --bg-card: #1e2235;
+  --bg-card-hover: #252a42;
+  --border: #2a2f4a;
+  --text-primary: #e8eaf0;
+  --text-secondary: #8b8fa8;
+  --text-muted: #5c6080;
+  --accent-blue: #4f8cff;
+  --accent-purple: #a855f7;
+  --accent-green: #22c55e;
+  --accent-orange: #f59e0b;
+  --accent-red: #ef4444;
+  --accent-cyan: #06b6d4;
+  --accent-pink: #ec4899;
+  --gradient-blue: linear-gradient(135deg, #4f8cff 0%, #3b82f6 100%);
+  --gradient-purple: linear-gradient(135deg, #a855f7 0%, #8b5cf6 100%);
+  --gradient-green: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  --shadow-glow: 0 0 30px rgba(79,140,255,0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Header */
+.hero {
+  background: linear-gradient(135deg, #1a1d2e 0%, #0f1117 50%, #1a1025 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 48px 0 40px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(79,140,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -150px; left: -50px;
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(168,85,247,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, #e8eaf0, #a0a8c8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero .subtitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-top: 8px;
+}
+.hero .date {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-top: 12px;
+}
+
+/* KPI Cards */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 32px 0;
+}
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 24px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-blue);
+}
+.kpi-card .kpi-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+.kpi-card .kpi-value {
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin: 6px 0 4px;
+}
+.kpi-card .kpi-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.kpi-card .kpi-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.badge-up { background: rgba(34,197,94,0.15); color: var(--accent-green); }
+.badge-down { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.kpi-card:nth-child(1)::after { background: var(--gradient-blue); }
+.kpi-card:nth-child(2)::after { background: var(--gradient-green); }
+.kpi-card:nth-child(3)::after { background: var(--gradient-purple); }
+.kpi-card:nth-child(4)::after { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.kpi-card:nth-child(5)::after { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+
+/* Sections */
+.section {
+  margin: 40px 0;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.section-header .icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+.section-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.section-header .tag {
+  font-size: 0.7rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(79,140,255,0.12);
+  color: var(--accent-blue);
+  font-weight: 500;
+}
+
+/* Cards */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Charts */
+.chart-container {
+  position: relative;
+  height: 340px;
+  width: 100%;
+}
+.chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Tables */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.data-table th {
+  background: rgba(79,140,255,0.08);
+  padding: 10px 14px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.data-table th:first-child { text-align: left; border-radius: 8px 0 0 0; }
+.data-table th:last-child { border-radius: 0 8px 0 0; }
+.data-table td {
+  padding: 9px 14px;
+  text-align: right;
+  border-bottom: 1px solid rgba(42,47,74,0.5);
+  white-space: nowrap;
+}
+.data-table td:first-child {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.data-table tr:hover td { background: rgba(79,140,255,0.04); }
+.data-table .year-total td {
+  font-weight: 700;
+  background: rgba(79,140,255,0.06);
+  border-top: 2px solid var(--accent-blue);
+}
+.data-table .csv-note { color: var(--accent-orange); font-size: 0.7rem; }
+.text-green { color: var(--accent-green); font-weight: 600; }
+.text-red { color: var(--accent-red); font-weight: 600; }
+.text-blue { color: var(--accent-blue); }
+.text-orange { color: var(--accent-orange); }
+.text-purple { color: var(--accent-purple); font-weight: 600; }
+
+/* Insights */
+.insight-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.insight-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  border-left: 3px solid;
+}
+.insight-box.positive { border-left-color: var(--accent-green); }
+.insight-box.negative { border-left-color: var(--accent-red); }
+.insight-box.info { border-left-color: var(--accent-blue); }
+.insight-box.warning { border-left-color: var(--accent-orange); }
+.insight-box h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.insight-box p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.insight-box .highlight {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 8px;
+  background: rgba(79,140,255,0.12);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+.progress-bar .fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s ease;
+}
+
+/* Footer */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 0;
+  margin-top: 60px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+/* Pill tabs */
+.tab-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.tab-pill {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+.tab-pill.active {
+  background: var(--accent-blue);
+  color: #fff;
+  border-color: var(--accent-blue);
+}
+
+@media (max-width: 768px) {
+  .chart-row, .insight-grid { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero h1 { font-size: 1.5rem; }
+  .data-table { font-size: 0.75rem; }
+  .data-table th, .data-table td { padding: 7px 8px; }
+}
+
+@media print {
+  body { background: #fff; color: #222; }
+  .card, .kpi-card, .insight-box { 
+    background: #fff; border: 1px solid #ddd; 
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .hero { background: #f8f9fa; }
+  .hero h1 { -webkit-text-fill-color: #222; }
+}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<header class="hero">
+  <div class="container">
+    <h1>ベストワン藍住校 売上分析レポート</h1>
+    <p class="subtitle">2015年度（開校）〜2026年度（4月）｜月次売上・生徒数・生徒単価の推移分析</p>
+    <p class="date">作成日: 2026年4月2日 ｜ データソース: Excel確定値 + CSV塾マネ出力</p>
+  </div>
+</header>
+
+<main class="container">
+
+<!-- KPI Cards -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-label">2026年4月 授業料＋諸費</div>
+    <div class="kpi-value text-blue">¥1,447,355</div>
+    <div class="kpi-sub"><span class="kpi-badge badge-up">▲ +16.0% 前年同月比</span></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">2026年4月 生徒数</div>
+    <div class="kpi-value" style="color:var(--accent-green)">37名</div>
+    <div class="kpi-sub">前年同月 39名（-2名）</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">2026年4月 生徒単価</div>
+    <div class="kpi-value" style="color:var(--accent-purple)">¥39,118</div>
+    <div class="kpi-sub"><span class="kpi-badge badge-up">▲ +19.1% 前年度比</span></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">学習サポート費 適用率</div>
+    <div class="kpi-value" style="color:var(--accent-orange)">86%</div>
+    <div class="kpi-sub">32/37名 ｜ 月額 ¥176,055</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">2026年4月 入学金</div>
+    <div class="kpi-value" style="color:var(--accent-cyan)">¥132,000</div>
+    <div class="kpi-sub">新規6名分 ｜ 総売上 ¥1,579,355</div>
+  </div>
+</div>
+
+<!-- Chart: Monthly Sales Trend -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(79,140,255,0.12);color:var(--accent-blue)">📊</div>
+    <h2>月次売上推移</h2>
+    <span class="tag">授業料＋諸費</span>
+  </div>
+  <div class="card">
+    <div class="chart-container">
+      <canvas id="salesChart"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- Charts: Students + Unit Price -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(34,197,94,0.12);color:var(--accent-green)">👥</div>
+    <h2>生徒数・生徒単価の推移</h2>
+  </div>
+  <div class="chart-row">
+    <div class="card">
+      <div class="card-title">📈 生徒数推移</div>
+      <div class="chart-container">
+        <canvas id="studentsChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">💰 生徒単価推移</div>
+      <div class="chart-container">
+        <canvas id="unitPriceChart"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Year Summary Table -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(168,85,247,0.12);color:var(--accent-purple)">📋</div>
+    <h2>年度別サマリー</h2>
+  </div>
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>年度</th><th>月数</th><th>月平均生徒数</th><th>年間授業料＋諸費</th><th>入学金</th><th>月平均売上</th><th>平均生徒単価</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>2015年度(7ヶ月)</td><td>7</td><td>15.3</td><td>¥2,380,020</td><td>¥10,800</td><td>¥340,002</td><td>¥22,243</td></tr>
+        <tr><td>2016年度</td><td>12</td><td>35.8</td><td>¥9,908,640</td><td>¥129,600</td><td>¥825,720</td><td>¥23,097</td></tr>
+        <tr><td>2017年度</td><td>12</td><td>50.0</td><td>¥15,199,020</td><td>¥156,600</td><td>¥1,266,585</td><td>¥25,331</td></tr>
+        <tr><td>2018年度</td><td>12</td><td>56.3</td><td>¥18,200,316</td><td>¥108,000</td><td>¥1,516,693</td><td>¥26,923</td></tr>
+        <tr><td>2019年度</td><td>12</td><td>60.3</td><td>¥19,676,698</td><td>¥27,200</td><td>¥1,639,724</td><td>¥27,177</td></tr>
+        <tr><td>2020年度</td><td>12</td><td>63.5</td><td>¥22,692,470</td><td>¥77,000</td><td>¥1,891,039</td><td>¥29,780</td></tr>
+        <tr><td>2021年度</td><td>12</td><td>56.8</td><td>¥21,537,370</td><td>¥44,000</td><td>¥1,794,780</td><td>¥31,626</td></tr>
+        <tr><td>2022年度</td><td>12</td><td>71.3</td><td>¥24,662,060</td><td>¥27,500</td><td>¥2,055,171</td><td>¥28,810</td></tr>
+        <tr><td>2023年度</td><td>12</td><td>65.5</td><td>¥24,001,550</td><td>¥0</td><td>¥2,000,129</td><td>¥30,537</td></tr>
+        <tr><td>2024年度</td><td>12</td><td>52.8</td><td>¥20,445,260</td><td>¥11,000</td><td>¥1,703,772</td><td>¥32,299</td></tr>
+        <tr><td>2025年度</td><td>12</td><td>44.2</td><td>¥17,403,812</td><td>¥352,000</td><td>¥1,450,318</td><td>¥32,837</td></tr>
+        <tr class="year-total"><td>2026年度(4月)</td><td>1</td><td>37.0</td><td>¥1,447,355</td><td>¥132,000</td><td>¥1,447,355</td><td>¥39,118</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- YoY Comparison -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(245,158,11,0.12);color:var(--accent-orange)">🔄</div>
+    <h2>前年同月比</h2>
+  </div>
+
+  <div class="card">
+    <div class="card-title">2024年度 vs 2025年度</div>
+    <div class="chart-container" style="height:300px">
+      <canvas id="yoyChart"></canvas>
+    </div>
+  </div>
+
+  <div class="card" style="overflow-x:auto">
+    <div class="card-title">2024年度 → 2025年度 詳細</div>
+    <table class="data-table">
+      <thead>
+        <tr><th>月</th><th>2024年度</th><th>2025年度</th><th>差額</th><th>前年比</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>4月</td><td>¥1,756,810</td><td>¥1,247,624</td><td class="text-red">-¥509,186</td><td class="text-red">71.0%</td></tr>
+        <tr><td>5月</td><td>¥1,797,840</td><td>¥1,328,754</td><td class="text-red">-¥469,086</td><td class="text-red">73.9%</td></tr>
+        <tr><td>6月</td><td>¥1,868,680</td><td>¥1,381,056</td><td class="text-red">-¥487,624</td><td class="text-red">73.9%</td></tr>
+        <tr><td>7月</td><td>¥1,828,970</td><td>¥1,364,476</td><td class="text-red">-¥464,494</td><td class="text-red">74.6%</td></tr>
+        <tr><td>8月</td><td>¥1,693,120</td><td>¥1,364,476</td><td class="text-red">-¥328,644</td><td class="text-red">80.6%</td></tr>
+        <tr><td>9月</td><td>¥1,715,560</td><td>¥1,489,448</td><td class="text-red">-¥226,112</td><td>86.8%</td></tr>
+        <tr><td>10月</td><td>¥1,689,490</td><td>¥1,558,368</td><td class="text-red">-¥131,122</td><td>92.2%</td></tr>
+        <tr><td>11月</td><td>¥1,809,720</td><td>¥1,565,418</td><td class="text-red">-¥244,302</td><td>86.5%</td></tr>
+        <tr><td>12月</td><td>¥1,771,880</td><td>¥1,581,872</td><td class="text-red">-¥190,008</td><td>89.3%</td></tr>
+        <tr><td>1月</td><td>¥1,700,160</td><td>¥1,625,432</td><td class="text-red">-¥74,728</td><td>95.6%</td></tr>
+        <tr><td>2月</td><td>¥1,542,640</td><td>¥1,580,140</td><td class="text-green">+¥37,500</td><td class="text-green">102.4%</td></tr>
+        <tr><td>3月</td><td>¥1,270,390</td><td>¥1,316,748</td><td class="text-green">+¥46,358</td><td class="text-green">103.6%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">2025年度 → 2026年度（4月のみ）</div>
+    <table class="data-table">
+      <thead>
+        <tr><th>月</th><th>2025年度</th><th>2026年度</th><th>差額</th><th>前年比</th></tr>
+      </thead>
+      <tbody>
+        <tr class="year-total"><td>4月</td><td>¥1,247,624</td><td>¥1,447,355</td><td class="text-green">+¥199,731</td><td class="text-green">116.0%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Adjustment Fee / Learning Support -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(236,72,153,0.12);color:var(--accent-pink)">🎯</div>
+    <h2>授業調整費 / 学習サポート費 分析</h2>
+    <span class="tag">2026年4月より全員適用</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 適用率と月額推移</div>
+    <div class="chart-container" style="height:300px">
+      <canvas id="adjFeeChart"></canvas>
+    </div>
+  </div>
+
+  <div class="card" style="overflow-x:auto">
+    <div class="card-title">年度別サマリー</div>
+    <table class="data-table">
+      <thead>
+        <tr><th>年度</th><th>名称</th><th>適用率</th><th>月額合計</th><th>対象者1人平均</th><th>年間合計</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2024年度</td><td>授業調整費</td><td>22〜27%</td><td>¥58,520</td><td>¥4,501</td><td>¥679,140</td></tr>
+        <tr><td>2025年度</td><td>授業調整費</td><td>24→42%</td><td>月平均¥69,897</td><td>¥4,905</td><td>¥838,772</td></tr>
+        <tr class="year-total"><td>2026年4月</td><td class="text-purple">学習サポート費</td><td class="text-purple">86%</td><td class="text-purple">¥176,055</td><td>¥5,501</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:16px;padding:14px 18px;background:rgba(168,85,247,0.08);border-radius:10px;border:1px solid rgba(168,85,247,0.2)">
+      <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.7">
+        <strong style="color:var(--accent-purple)">🔄 2026年4月の制度転換:</strong><br>
+        「授業調整費」→「学習サポート費」に改名。従来は講師指名・時間割優遇の<strong>プレミア特典</strong>（全体の22〜42%）でしたが、
+        2026年度より<strong>進路指導・自社開発学習アプリの優先利用権</strong>を含む全員適用型に転換。
+        適用率は<strong style="color:var(--accent-purple)">86%（32/37名）</strong>に急拡大。
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💰 生徒単価への影響</div>
+    <table class="data-table">
+      <thead>
+        <tr><th>年度</th><th>平均生徒単価</th><th>前年比</th><th>うちサポート費(全体按分)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2015年度</td><td>¥22,243</td><td>—</td><td>なし</td></tr>
+        <tr><td>2016年度</td><td>¥23,097</td><td>+3.8%</td><td>なし</td></tr>
+        <tr><td>2017年度</td><td>¥25,331</td><td>+9.7%</td><td>なし</td></tr>
+        <tr><td>2018年度</td><td>¥26,923</td><td>+6.3%</td><td>なし</td></tr>
+        <tr><td>2019年度</td><td>¥27,177</td><td>+0.9%</td><td>なし</td></tr>
+        <tr><td>2020年度</td><td>¥29,780</td><td>+9.6%</td><td>なし</td></tr>
+        <tr><td>2021年度</td><td>¥31,626</td><td>+6.2%</td><td>なし</td></tr>
+        <tr><td>2022年度</td><td>¥28,810</td><td>-8.9%</td><td>なし</td></tr>
+        <tr><td>2023年度</td><td>¥30,537</td><td>+6.0%</td><td>なし</td></tr>
+        <tr><td>2024年度</td><td>¥32,299</td><td>+5.9%</td><td>¥1,044</td></tr>
+        <tr><td>2025年度</td><td>¥32,837</td><td>+1.7%</td><td>¥1,582</td></tr>
+        <tr class="year-total"><td>2026/04</td><td class="text-purple">¥39,118</td><td class="text-green">+19.1%</td><td class="text-purple">¥4,758</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:16px;">
+      <p style="font-size:0.8rem;color:var(--text-secondary)">
+        2026/04の単価上昇 <strong>+¥6,281</strong>（vs 前年度平均）のうち、学習サポート費の寄与は約 <strong>¥3,176</strong>（按分差分）。
+        残りは授業料体系や学年構成の変化による。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Key Insights -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(6,182,212,0.12);color:var(--accent-cyan)">💡</div>
+    <h2>主要な気づき</h2>
+  </div>
+
+  <div class="insight-grid">
+    <div class="insight-box positive">
+      <h4>📈 生徒単価76%上昇</h4>
+      <p>¥22,243（2015年開校時）→ <span class="highlight">¥39,118</span>（2026/04）。10年間で+76%。学習サポート費の全員適用が直近の急伸要因。</p>
+    </div>
+    <div class="insight-box positive">
+      <h4>🎯 V字回復の兆候</h4>
+      <p>2025年度下半期から前年比が改善。2月・3月は<span class="highlight">前年プラス</span>。2026/04は<span class="highlight">+16.0%</span>。</p>
+    </div>
+    <div class="insight-box negative">
+      <h4>⚠️ 生徒数: ピークから半減</h4>
+      <p>7名（2015年開校）→ <span class="highlight">78名</span>（2020/08ピーク）→ <span class="highlight">37名</span>（2026/04）。ピークから3年で約半減。</p>
+    </div>
+    <div class="insight-box warning">
+      <h4>🔑 サービス品質の維持</h4>
+      <p>学習サポート費の<span class="highlight">全員適用（86%）</span>を持続するには、進路指導・学習アプリの品質維持が不可欠。</p>
+    </div>
+    <div class="insight-box info">
+      <h4>💰 入学金の活発化</h4>
+      <p>2025年度: ¥352,000 → 2026/04のみ: <span class="highlight">¥132,000</span>（6名分）。新規生獲得が好調。</p>
+    </div>
+    <div class="insight-box info">
+      <h4>📊 年間売上: 10年の軌跡</h4>
+      <p>¥2.4M（2015）→ 急成長 → <span class="highlight">¥24.7M</span>（2022ピーク）→ ¥17.4M（2025）。ピークから30%減だが<span class="highlight">単価上昇で減速</span>。</p>
+    </div>
+  </div>
+</section>
+
+<!-- Monthly Detail Table -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(79,140,255,0.12);color:var(--accent-blue)">📑</div>
+    <h2>月次詳細データ</h2>
+  </div>
+  <div class="card" style="overflow-x:auto">
+    <table class="data-table" id="monthlyTable">
+      <thead>
+        <tr><th>年月</th><th>生徒数</th><th>授業料＋諸費</th><th>入学金</th><th>生徒単価</th><th>備考</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>ベストワン藍住校 ｜ 社内資料 ｜ 2026年4月2日作成</p>
+  </div>
+</footer>
+
+<script>
+// === DATA ===
+const monthlyData = [
+  // 2015
+  {ym:'2015/09',fy:2015,m:9,students:7,sales:170148,enroll:0,note:'開校'},
+  {ym:'2015/10',fy:2015,m:10,students:13,sales:275520,enroll:0,note:''},
+  {ym:'2015/11',fy:2015,m:11,students:13,sales:278868,enroll:0,note:''},
+  {ym:'2015/12',fy:2015,m:12,students:13,sales:278868,enroll:0,note:''},
+  {ym:'2016/01',fy:2015,m:1,students:14,sales:292128,enroll:10800,note:''},
+  {ym:'2016/02',fy:2015,m:2,students:19,sales:381108,enroll:0,note:''},
+  {ym:'2016/03',fy:2015,m:3,students:28,sales:703380,enroll:0,note:''},
+  // 2016
+  {ym:'2016/04',fy:2016,m:4,students:30,sales:607104,enroll:16200,note:''},
+  {ym:'2016/05',fy:2016,m:5,students:30,sales:610884,enroll:0,note:''},
+  {ym:'2016/06',fy:2016,m:6,students:30,sales:602460,enroll:0,note:''},
+  {ym:'2016/07',fy:2016,m:7,students:30,sales:602460,enroll:0,note:''},
+  {ym:'2016/08',fy:2016,m:8,students:36,sales:839538,enroll:21600,note:''},
+  {ym:'2016/09',fy:2016,m:9,students:36,sales:853038,enroll:0,note:''},
+  {ym:'2016/10',fy:2016,m:10,students:37,sales:885306,enroll:21600,note:''},
+  {ym:'2016/11',fy:2016,m:11,students:37,sales:885306,enroll:0,note:''},
+  {ym:'2016/12',fy:2016,m:12,students:40,sales:1039350,enroll:54000,note:''},
+  {ym:'2017/01',fy:2016,m:1,students:42,sales:1106082,enroll:0,note:''},
+  {ym:'2017/02',fy:2016,m:2,students:39,sales:836640,enroll:0,note:''},
+  {ym:'2017/03',fy:2016,m:3,students:42,sales:1040472,enroll:16200,note:''},
+  // 2017
+  {ym:'2017/04',fy:2017,m:4,students:40,sales:1003584,enroll:0,note:''},
+  {ym:'2017/05',fy:2017,m:5,students:42,sales:1030968,enroll:0,note:''},
+  {ym:'2017/06',fy:2017,m:6,students:40,sales:1029252,enroll:10800,note:''},
+  {ym:'2017/07',fy:2017,m:7,students:40,sales:1029252,enroll:0,note:''},
+  {ym:'2017/08',fy:2017,m:8,students:49,sales:1254108,enroll:21600,note:''},
+  {ym:'2017/09',fy:2017,m:9,students:53,sales:1296888,enroll:54000,note:''},
+  {ym:'2017/10',fy:2017,m:10,students:54,sales:1366092,enroll:10800,note:''},
+  {ym:'2017/11',fy:2017,m:11,students:54,sales:1363284,enroll:21600,note:''},
+  {ym:'2017/12',fy:2017,m:12,students:59,sales:1525380,enroll:0,note:''},
+  {ym:'2018/01',fy:2017,m:1,students:56,sales:1444668,enroll:0,note:''},
+  {ym:'2018/02',fy:2017,m:2,students:54,sales:1380672,enroll:0,note:''},
+  {ym:'2018/03',fy:2017,m:3,students:59,sales:1474872,enroll:37800,note:''},
+  // 2018
+  {ym:'2018/04',fy:2018,m:4,students:56,sales:1418244,enroll:0,note:''},
+  {ym:'2018/05',fy:2018,m:5,students:57,sales:1450674,enroll:21600,note:''},
+  {ym:'2018/06',fy:2018,m:6,students:56,sales:1431690,enroll:0,note:''},
+  {ym:'2018/07',fy:2018,m:7,students:54,sales:1386324,enroll:0,note:''},
+  {ym:'2018/08',fy:2018,m:8,students:53,sales:1401468,enroll:0,note:''},
+  {ym:'2018/09',fy:2018,m:9,students:55,sales:1522596,enroll:43200,note:''},
+  {ym:'2018/10',fy:2018,m:10,students:56,sales:1575384,enroll:32400,note:''},
+  {ym:'2018/11',fy:2018,m:11,students:56,sales:1582728,enroll:0,note:''},
+  {ym:'2018/12',fy:2018,m:12,students:59,sales:1649616,enroll:0,note:''},
+  {ym:'2019/01',fy:2018,m:1,students:59,sales:1659552,enroll:10800,note:''},
+  {ym:'2019/02',fy:2018,m:2,students:57,sales:1570608,enroll:0,note:''},
+  {ym:'2019/03',fy:2018,m:3,students:58,sales:1551432,enroll:0,note:''},
+  // 2019
+  {ym:'2019/04',fy:2019,m:4,students:58,sales:1532532,enroll:0,note:''},
+  {ym:'2019/05',fy:2019,m:5,students:60,sales:1634760,enroll:16200,note:''},
+  {ym:'2019/06',fy:2019,m:6,students:60,sales:1616508,enroll:0,note:''},
+  {ym:'2019/07',fy:2019,m:7,students:59,sales:1599684,enroll:0,note:''},
+  {ym:'2019/08',fy:2019,m:8,students:62,sales:1638924,enroll:0,note:''},
+  {ym:'2019/09',fy:2019,m:9,students:63,sales:1716970,enroll:11000,note:''},
+  {ym:'2019/10',fy:2019,m:10,students:62,sales:1698080,enroll:0,note:'消費税10%'},
+  {ym:'2019/11',fy:2019,m:11,students:61,sales:1684965,enroll:0,note:''},
+  {ym:'2019/12',fy:2019,m:12,students:62,sales:1704735,enroll:0,note:''},
+  {ym:'2020/01',fy:2019,m:1,students:60,sales:1664755,enroll:0,note:''},
+  {ym:'2020/02',fy:2019,m:2,students:56,sales:1541345,enroll:0,note:''},
+  {ym:'2020/03',fy:2019,m:3,students:61,sales:1643440,enroll:0,note:''},
+  // 2020
+  {ym:'2020/04',fy:2020,m:4,students:62,sales:1725140,enroll:5500,note:'コロナ'},
+  {ym:'2020/05',fy:2020,m:5,students:60,sales:1706280,enroll:5500,note:''},
+  {ym:'2020/06',fy:2020,m:6,students:60,sales:1731690,enroll:0,note:''},
+  {ym:'2020/07',fy:2020,m:7,students:61,sales:1809100,enroll:22000,note:''},
+  {ym:'2020/08',fy:2020,m:8,students:64,sales:1881280,enroll:0,note:''},
+  {ym:'2020/09',fy:2020,m:9,students:68,sales:2012610,enroll:22000,note:''},
+  {ym:'2020/10',fy:2020,m:10,students:68,sales:2059030,enroll:22000,note:''},
+  {ym:'2020/11',fy:2020,m:11,students:68,sales:2059030,enroll:0,note:''},
+  {ym:'2020/12',fy:2020,m:12,students:65,sales:2002800,enroll:0,note:''},
+  {ym:'2021/01',fy:2020,m:1,students:68,sales:2142520,enroll:0,note:''},
+  {ym:'2021/02',fy:2020,m:2,students:61,sales:1856950,enroll:0,note:''},
+  {ym:'2021/03',fy:2020,m:3,students:57,sales:1706040,enroll:0,note:''},
+  // 2021
+  {ym:'2021/04',fy:2021,m:4,students:56,sales:1689570,enroll:22000,note:''},
+  {ym:'2021/05',fy:2021,m:5,students:54,sales:1629680,enroll:0,note:''},
+  {ym:'2021/06',fy:2021,m:6,students:54,sales:1656080,enroll:0,note:''},
+  {ym:'2021/07',fy:2021,m:7,students:54,sales:1641010,enroll:0,note:''},
+  {ym:'2021/08',fy:2021,m:8,students:56,sales:1791210,enroll:22000,note:''},
+  {ym:'2021/09',fy:2021,m:9,students:55,sales:1796630,enroll:0,note:''},
+  {ym:'2021/10',fy:2021,m:10,students:55,sales:1804330,enroll:0,note:''},
+  {ym:'2021/11',fy:2021,m:11,students:55,sales:1804330,enroll:0,note:''},
+  {ym:'2021/12',fy:2021,m:12,students:59,sales:1934010,enroll:0,note:''},
+  {ym:'2022/01',fy:2021,m:1,students:58,sales:1937780,enroll:0,note:''},
+  {ym:'2022/02',fy:2021,m:2,students:57,sales:1813290,enroll:0,note:''},
+  {ym:'2022/03',fy:2021,m:3,students:68,sales:2039450,enroll:0,note:''},
+  // 2022
+  {ym:'2022/04',fy:2022,m:4,students:71,sales:2125270,enroll:0,note:''},
+  {ym:'2022/05',fy:2022,m:5,students:73,sales:2130380,enroll:22000,note:''},
+  {ym:'2022/06',fy:2022,m:6,students:73,sales:2128290,enroll:5500,note:''},
+  {ym:'2022/07',fy:2022,m:7,students:72,sales:2063750,enroll:0,note:''},
+  {ym:'2022/08',fy:2022,m:8,students:78,sales:2202060,enroll:0,note:''},
+  {ym:'2022/09',fy:2022,m:9,students:76,sales:2159660,enroll:0,note:''},
+  {ym:'2022/10',fy:2022,m:10,students:74,sales:2131010,enroll:0,note:''},
+  {ym:'2022/11',fy:2022,m:11,students:71,sales:2055640,enroll:0,note:''},
+  {ym:'2022/12',fy:2022,m:12,students:72,sales:2028770,enroll:0,note:''},
+  {ym:'2023/01',fy:2022,m:1,students:71,sales:2007790,enroll:0,note:''},
+  {ym:'2023/02',fy:2022,m:2,students:63,sales:1797490,enroll:0,note:''},
+  {ym:'2023/03',fy:2022,m:3,students:62,sales:1831950,enroll:0,note:''},
+  // 2023
+  {ym:'2023/04',fy:2023,m:4,students:62,sales:1883090,enroll:0,note:''},
+  {ym:'2023/05',fy:2023,m:5,students:68,sales:2058870,enroll:0,note:''},
+  {ym:'2023/06',fy:2023,m:6,students:65,sales:2028180,enroll:0,note:''},
+  {ym:'2023/07',fy:2023,m:7,students:66,sales:2048970,enroll:0,note:''},
+  {ym:'2023/08',fy:2023,m:8,students:67,sales:2040940,enroll:0,note:''},
+  {ym:'2023/09',fy:2023,m:9,students:70,sales:2130040,enroll:0,note:''},
+  {ym:'2023/10',fy:2023,m:10,students:71,sales:2207370,enroll:0,note:''},
+  {ym:'2023/11',fy:2023,m:11,students:71,sales:2137300,enroll:0,note:''},
+  {ym:'2023/12',fy:2023,m:12,students:71,sales:2132750,enroll:0,note:'※CSV+Comiru'},
+  {ym:'2024/01',fy:2023,m:1,students:65,sales:1976950,enroll:0,note:'※CSV+Comiru'},
+  {ym:'2024/02',fy:2023,m:2,students:54,sales:1659160,enroll:0,note:'※CSV+Comiru'},
+  {ym:'2024/03',fy:2023,m:3,students:56,sales:1697930,enroll:0,note:'※CSV+Comiru'},
+  {ym:'2024/04',fy:2024,m:4,students:56,sales:1756810,enroll:0,note:''},
+  {ym:'2024/05',fy:2024,m:5,students:58,sales:1797840,enroll:0,note:''},
+  {ym:'2024/06',fy:2024,m:6,students:59,sales:1868680,enroll:0,note:''},
+  {ym:'2024/07',fy:2024,m:7,students:58,sales:1828970,enroll:0,note:''},
+  {ym:'2024/08',fy:2024,m:8,students:52,sales:1693120,enroll:0,note:''},
+  {ym:'2024/09',fy:2024,m:9,students:52,sales:1715560,enroll:11000,note:''},
+  {ym:'2024/10',fy:2024,m:10,students:52,sales:1689490,enroll:0,note:''},
+  {ym:'2024/11',fy:2024,m:11,students:53,sales:1809720,enroll:0,note:''},
+  {ym:'2024/12',fy:2024,m:12,students:52,sales:1771880,enroll:0,note:''},
+  {ym:'2025/01',fy:2024,m:1,students:52,sales:1700160,enroll:0,note:''},
+  {ym:'2025/02',fy:2024,m:2,students:48,sales:1542640,enroll:0,note:''},
+  {ym:'2025/03',fy:2024,m:3,students:41,sales:1270390,enroll:0,note:''},
+  {ym:'2025/04',fy:2025,m:4,students:39,sales:1247624,enroll:99000,note:''},
+  {ym:'2025/05',fy:2025,m:5,students:41,sales:1328754,enroll:88000,note:''},
+  {ym:'2025/06',fy:2025,m:6,students:42,sales:1381056,enroll:33000,note:''},
+  {ym:'2025/07',fy:2025,m:7,students:42,sales:1364476,enroll:0,note:''},
+  {ym:'2025/08',fy:2025,m:8,students:42,sales:1364476,enroll:0,note:''},
+  {ym:'2025/09',fy:2025,m:9,students:45,sales:1489448,enroll:66000,note:''},
+  {ym:'2025/10',fy:2025,m:10,students:47,sales:1558368,enroll:44000,note:''},
+  {ym:'2025/11',fy:2025,m:11,students:48,sales:1565418,enroll:22000,note:''},
+  {ym:'2025/12',fy:2025,m:12,students:48,sales:1581872,enroll:0,note:''},
+  {ym:'2026/01',fy:2025,m:1,students:48,sales:1625432,enroll:0,note:''},
+  {ym:'2026/02',fy:2025,m:2,students:47,sales:1580140,enroll:0,note:''},
+  {ym:'2026/03',fy:2025,m:3,students:41,sales:1316748,enroll:0,note:''},
+  {ym:'2026/04',fy:2026,m:4,students:37,sales:1447355,enroll:132000,note:''},
+];
+
+const adjFeeData = [
+  {ym:'2024/04',with:13,total:56,amount:58520},
+  {ym:'2024/05',with:13,total:58,amount:58520},
+  {ym:'2024/06',with:13,total:59,amount:58520},
+  {ym:'2024/07',with:13,total:58,amount:58520},
+  {ym:'2024/08',with:13,total:52,amount:58520},
+  {ym:'2024/09',with:13,total:52,amount:58520},
+  {ym:'2024/10',with:13,total:52,amount:58520},
+  {ym:'2024/11',with:13,total:53,amount:58520},
+  {ym:'2024/12',with:13,total:52,amount:58520},
+  {ym:'2025/01',with:13,total:52,amount:58520},
+  {ym:'2025/02',with:13,total:48,amount:58520},
+  {ym:'2025/03',with:8,total:41,amount:35420},
+  {ym:'2025/04',with:10,total:39,amount:48884},
+  {ym:'2025/05',with:10,total:41,amount:48884},
+  {ym:'2025/06',with:11,total:42,amount:53966},
+  {ym:'2025/07',with:11,total:42,amount:53966},
+  {ym:'2025/08',with:11,total:42,amount:53966},
+  {ym:'2025/09',with:13,total:45,amount:63888},
+  {ym:'2025/10',with:15,total:47,amount:73568},
+  {ym:'2025/11',with:18,total:48,amount:92928},
+  {ym:'2025/12',with:20,total:48,amount:97042},
+  {ym:'2026/01',with:20,total:48,amount:97042},
+  {ym:'2026/02',with:19,total:47,amount:91960},
+  {ym:'2026/03',with:13,total:41,amount:62678},
+  {ym:'2026/04',with:32,total:37,amount:176055},
+];
+
+const fmt = n => '¥' + n.toLocaleString();
+
+// Populate monthly table
+const tbody = document.querySelector('#monthlyTable tbody');
+let currentFy = null;
+monthlyData.forEach(d => {
+  if (currentFy !== null && d.fy !== currentFy) {
+    const sep = document.createElement('tr');
+    sep.innerHTML = '<td colspan="6" style="height:4px;background:var(--border);padding:0"></td>';
+    tbody.appendChild(sep);
+  }
+  currentFy = d.fy;
+  const unit = Math.round(d.sales / d.students);
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${d.ym}</td><td>${d.students}</td><td>${fmt(d.sales)}</td><td>${d.enroll ? fmt(d.enroll) : '—'}</td><td>${fmt(unit)}</td><td class="csv-note">${d.note}</td>`;
+  tbody.appendChild(tr);
+});
+
+// === CHARTS ===
+const chartFont = { family: "'Noto Sans JP', sans-serif" };
+Chart.defaults.font.family = chartFont.family;
+Chart.defaults.color = '#8b8fa8';
+
+const fyColors = {
+  2015: {line:'#94a3b8',bg:'rgba(148,163,184,0.1)'},
+  2016: {line:'#78716c',bg:'rgba(120,113,108,0.1)'},
+  2017: {line:'#a1887f',bg:'rgba(161,136,127,0.1)'},
+  2018: {line:'#ef9a9a',bg:'rgba(239,154,154,0.1)'},
+  2019: {line:'#ce93d8',bg:'rgba(206,147,216,0.1)'},
+  2020: {line:'#90caf9',bg:'rgba(144,202,249,0.1)'},
+  2021: {line:'#80cbc4',bg:'rgba(128,203,196,0.1)'},
+  2022: {line:'#6b7280',bg:'rgba(107,114,128,0.1)'},
+  2023: {line:'#4f8cff',bg:'rgba(79,140,255,0.1)'},
+  2024: {line:'#f59e0b',bg:'rgba(245,158,11,0.1)'},
+  2025: {line:'#22c55e',bg:'rgba(34,197,94,0.1)'},
+  2026: {line:'#a855f7',bg:'rgba(168,85,247,0.15)'},
+};
+
+// Main Sales Chart
+new Chart(document.getElementById('salesChart'), {
+  type: 'line',
+  data: {
+    labels: monthlyData.map(d => d.ym),
+    datasets: [{
+      label: '授業料＋諸費',
+      data: monthlyData.map(d => d.sales),
+      borderColor: '#4f8cff',
+      backgroundColor: 'rgba(79,140,255,0.08)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 3,
+      pointHoverRadius: 6,
+      borderWidth: 2.5,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => fmt(ctx.parsed.y),
+          afterLabel: ctx => {
+            const d = monthlyData[ctx.dataIndex];
+            return `生徒数: ${d.students}名 ｜ 単価: ${fmt(Math.round(d.sales/d.students))}`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        grid: { color: 'rgba(42,47,74,0.4)' },
+        ticks: { callback: v => '¥' + (v/10000).toFixed(0) + '万' }
+      },
+      x: {
+        grid: { display: false },
+        ticks: { maxRotation: 45, font: { size: 10 } }
+      }
+    }
+  }
+});
+
+// Students Chart
+new Chart(document.getElementById('studentsChart'), {
+  type: 'bar',
+  data: {
+    labels: monthlyData.map(d => d.ym),
+    datasets: [{
+      label: '生徒数',
+      data: monthlyData.map(d => d.students),
+      backgroundColor: monthlyData.map(d => {
+        const c = fyColors[d.fy] || fyColors[2022];
+        return c.line + '99';
+      }),
+      borderRadius: 3,
+      barPercentage: 0.7,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { grid: { color: 'rgba(42,47,74,0.4)' }, beginAtZero: true },
+      x: { grid: { display: false }, ticks: { maxRotation: 90, font: { size: 7 }, maxTicksLimit: 40 } }
+    }
+  }
+});
+
+// Unit Price Chart
+new Chart(document.getElementById('unitPriceChart'), {
+  type: 'line',
+  data: {
+    labels: monthlyData.map(d => d.ym),
+    datasets: [{
+      label: '生徒単価',
+      data: monthlyData.map(d => Math.round(d.sales / d.students)),
+      borderColor: '#a855f7',
+      backgroundColor: 'rgba(168,85,247,0.08)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 3,
+      borderWidth: 2.5,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => fmt(ctx.parsed.y) } } },
+    scales: {
+      y: { grid: { color: 'rgba(42,47,74,0.4)' }, ticks: { callback: v => '¥' + (v/1000).toFixed(0) + 'K' } },
+      x: { grid: { display: false }, ticks: { maxRotation: 90, font: { size: 8 } } }
+    }
+  }
+});
+
+// YoY Chart (2024 vs 2025)
+const months = ['4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'];
+const fy2024 = [1756810,1797840,1868680,1828970,1693120,1715560,1689490,1809720,1771880,1700160,1542640,1270390];
+const fy2025 = [1247624,1328754,1381056,1364476,1364476,1489448,1558368,1565418,1581872,1625432,1580140,1316748];
+new Chart(document.getElementById('yoyChart'), {
+  type: 'bar',
+  data: {
+    labels: months,
+    datasets: [
+      { label: '2024年度', data: fy2024, backgroundColor: 'rgba(245,158,11,0.6)', borderRadius: 4, barPercentage: 0.4 },
+      { label: '2025年度', data: fy2025, backgroundColor: 'rgba(34,197,94,0.6)', borderRadius: 4, barPercentage: 0.4 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { boxWidth: 12, padding: 16 } }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt(ctx.parsed.y) } } },
+    scales: {
+      y: { grid: { color: 'rgba(42,47,74,0.4)' }, ticks: { callback: v => '¥' + (v/10000).toFixed(0) + '万' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// Adj Fee Chart
+new Chart(document.getElementById('adjFeeChart'), {
+  type: 'bar',
+  data: {
+    labels: adjFeeData.map(d => d.ym),
+    datasets: [
+      {
+        label: '月額合計',
+        data: adjFeeData.map(d => d.amount),
+        backgroundColor: adjFeeData.map(d => d.ym === '2026/04' ? 'rgba(168,85,247,0.7)' : 'rgba(236,72,153,0.5)'),
+        borderRadius: 3,
+        yAxisID: 'y',
+        barPercentage: 0.6,
+      },
+      {
+        label: '適用率',
+        data: adjFeeData.map(d => Math.round(d.with / d.total * 100)),
+        type: 'line',
+        borderColor: '#06b6d4',
+        backgroundColor: 'rgba(6,182,212,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        borderWidth: 2.5,
+        yAxisID: 'y1',
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { boxWidth: 12, padding: 16 } } },
+    scales: {
+      y: { grid: { color: 'rgba(42,47,74,0.4)' }, ticks: { callback: v => '¥' + (v/1000).toFixed(0) + 'K' }, position: 'left' },
+      y1: { grid: { display: false }, ticks: { callback: v => v + '%' }, position: 'right', min: 0, max: 100 },
+      x: { grid: { display: false }, ticks: { maxRotation: 90, font: { size: 8 } } }
+    }
+  }
+});
+</script>
+</body>
+</html>

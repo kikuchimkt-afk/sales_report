@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ベストワン 校舎比較ダッシュボード ｜ 藍住校・北島中央校</title>
+<meta name="description" content="ベストワン藍住校・北島中央校の売上・生徒数・単価を年度別に比較分析するインタラクティブダッシュボード">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0c14;--bg2:#111827;--card:#1a1f35;--card2:#1e2540;--border:#2a3055;
+  --t1:#e8eaf0;--t2:#8b92b0;--t3:#5b6280;
+  --az:#4f8cff;--az2:#3b82f6;--azBg:rgba(79,140,255,.1);
+  --kj:#22c55e;--kj2:#16a34a;--kjBg:rgba(34,197,94,.1);
+  --purple:#a855f7;--orange:#f59e0b;--red:#ef4444;--cyan:#06b6d4;--pink:#ec4899;
+}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--t1);line-height:1.7}
+.container{max-width:1360px;margin:0 auto;padding:0 28px}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0d1020 0%,#0a0c14 40%,#0d1520 100%);padding:44px 0 36px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-120px;right:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(79,140,255,.06) 0%,transparent 65%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-120px;left:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(34,197,94,.05) 0%,transparent 65%);pointer-events:none}
+.hero h1{font-size:2.1rem;font-weight:800;background:linear-gradient(135deg,#e8eaf0,#8ba8e0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:.02em}
+.hero .sub{color:var(--t2);font-size:.92rem;margin-top:6px}
+.hero .date{color:var(--t3);font-size:.78rem;margin-top:10px}
+.school-badges{display:flex;gap:12px;margin-top:16px}
+.school-badge{padding:6px 16px;border-radius:20px;font-size:.78rem;font-weight:600}
+.badge-az{background:var(--azBg);color:var(--az);border:1px solid rgba(79,140,255,.2)}
+.badge-kj{background:var(--kjBg);color:var(--kj);border:1px solid rgba(34,197,94,.2)}
+
+/* CONTROLS */
+.controls{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 28px;margin:28px 0;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.ctrl-group{display:flex;align-items:center;gap:8px}
+.ctrl-group label{font-size:.82rem;font-weight:600;color:var(--t2);white-space:nowrap}
+select{background:var(--card);color:var(--t1);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:.82rem;font-family:inherit;cursor:pointer;outline:none;transition:border .2s}
+select:focus{border-color:var(--az)}
+.ctrl-sep{width:1px;height:28px;background:var(--border);margin:0 8px}
+.btn{padding:7px 18px;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--az),var(--az2));color:#fff}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(79,140,255,.3)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--t2)}
+.btn-outline:hover{border-color:var(--az);color:var(--az)}
+
+/* CARDS */
+.section{margin:32px 0}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.section-header .icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.section-header h2{font-size:1.2rem;font-weight:700}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;box-shadow:0 4px 24px rgba(0,0,0,.25);transition:border-color .2s}
+.card:hover{border-color:rgba(79,140,255,.2)}
+.card-title{font-size:.88rem;font-weight:600;color:var(--t2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.chart-box{position:relative;height:340px;width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+
+/* KPIS */
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 22px;position:relative;overflow:hidden;transition:all .2s}
+.kpi:hover{transform:translateY(-2px);border-color:var(--az)}
+.kpi .label{font-size:.72rem;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.kpi .val{font-size:1.5rem;font-weight:700;margin:4px 0 2px}
+.kpi .sub{font-size:.72rem;color:var(--t3)}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi.az::after{background:linear-gradient(90deg,var(--az),var(--az2))}
+.kpi.kj::after{background:linear-gradient(90deg,var(--kj),var(--kj2))}
+.kpi.purple::after{background:linear-gradient(90deg,var(--purple),#8b5cf6)}
+.kpi.orange::after{background:linear-gradient(90deg,var(--orange),#d97706)}
+.up{color:var(--kj)!important}.down{color:var(--red)!important}
+.badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:.68rem;font-weight:600}
+.badge-up{background:rgba(34,197,94,.12);color:var(--kj)}
+.badge-down{background:rgba(239,68,68,.12);color:var(--red)}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:.8rem}
+.tbl th{background:rgba(79,140,255,.06);padding:10px 14px;text-align:right;font-weight:600;color:var(--t2);border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl th:first-child{text-align:left;border-radius:8px 0 0 0}
+.tbl th:last-child{border-radius:0 8px 0 0}
+.tbl td{padding:9px 14px;text-align:right;border-bottom:1px solid rgba(42,48,85,.5);white-space:nowrap}
+.tbl td:first-child{text-align:left;font-weight:500;color:var(--t1)}
+.tbl tr:hover td{background:rgba(79,140,255,.03)}
+.tbl .winner{font-weight:700}
+
+/* ADVICE */
+.advice-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.advice{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;border-left:4px solid;transition:all .2s}
+.advice:hover{transform:translateY(-2px)}
+.advice.critical{border-left-color:var(--red)}
+.advice.growth{border-left-color:var(--kj)}
+.advice.strategy{border-left-color:var(--az)}
+.advice.optimize{border-left-color:var(--orange)}
+.advice.insight{border-left-color:var(--purple)}
+.advice.compare{border-left-color:var(--cyan)}
+.advice h4{font-size:.88rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.advice p{font-size:.8rem;color:var(--t2);line-height:1.7}
+.advice .hl{font-weight:700;color:var(--t1)}
+.advice .num{font-weight:800;font-size:.95rem}
+.advice ul{margin:8px 0 0 18px;font-size:.78rem;color:var(--t2)}
+.advice li{margin:4px 0;line-height:1.5}
+
+footer{border-top:1px solid var(--border);padding:24px 0;margin-top:56px;text-align:center;color:var(--t3);font-size:.72rem}
+
+@media(max-width:900px){
+  .grid2,.grid3,.grid4,.advice-grid{grid-template-columns:1fr}
+  .controls{flex-direction:column;align-items:stretch}
+  .ctrl-sep{display:none}
+  .hero h1{font-size:1.5rem}
+}
+@media print{
+  body{background:#fff;color:#222}
+  .card,.kpi,.advice{background:#fff;border:1px solid #ddd;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .hero{background:#f0f4f8}.hero h1{-webkit-text-fill-color:#222}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+<div class="container">
+  <h1>ベストワン 校舎比較ダッシュボード</h1>
+  <p class="sub">藍住校・北島中央校の売上・生徒数・生徒単価を年度別に比較分析</p>
+  <p class="date">作成日: 2026年4月2日 ｜ データ期間: 2012年度〜2026年度</p>
+  <div class="school-badges">
+    <a href="aizumi.html" class="school-badge badge-az" style="text-decoration:none">🔵 藍住校 詳細レポート →</a>
+    <a href="kitajima.html" class="school-badge badge-kj" style="text-decoration:none">🟢 北島中央校 詳細レポート →</a>
+  </div>
+</div>
+</header>
+
+<main class="container">
+
+<!-- CONTROLS -->
+<div class="controls" id="controls">
+  <div class="ctrl-group">
+    <label>📅 期間選択:</label>
+    <select id="fyStart"></select>
+    <span style="color:var(--t3)">〜</span>
+    <select id="fyEnd"></select>
+  </div>
+  <div class="ctrl-sep"></div>
+  <div class="ctrl-group">
+    <label>📊 表示:</label>
+    <select id="metric">
+      <option value="sales">売上（授業料＋諸費）</option>
+      <option value="students">生徒数</option>
+      <option value="unit">生徒単価</option>
+    </select>
+  </div>
+  <div class="ctrl-sep"></div>
+  <button class="btn btn-primary" onclick="updateAll()">🔄 更新</button>
+  <button class="btn btn-outline" onclick="resetRange()">全期間</button>
+</div>
+
+<!-- KPI SUMMARY -->
+<div class="grid4" id="kpiGrid"></div>
+
+<!-- COMPARISON CHARTS -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:var(--azBg);color:var(--az)">📊</div>
+    <h2>校舎比較チャート</h2>
+  </div>
+  <div class="card">
+    <div class="card-title">📈 月次推移比較（選択期間）</div>
+    <div class="chart-box" style="height:380px"><canvas id="mainChart"></canvas></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title"><span style="color:var(--az)">🔵</span> 藍住校 年度別推移</div>
+      <div class="chart-box"><canvas id="azFyChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span style="color:var(--kj)">🟢</span> 北島中央校 年度別推移</div>
+      <div class="chart-box"><canvas id="kjFyChart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- OVERLAY CHART -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(168,85,247,.1);color:var(--purple)">🔄</div>
+    <h2>年度オーバーレイ比較</h2>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 同一年度の月別推移（4月〜3月）を重ねて比較</div>
+    <div style="margin-bottom:12px">
+      <select id="overlayFy1" style="margin-right:8px"></select>
+      <select id="overlayFy2"></select>
+      <button class="btn btn-primary" style="margin-left:12px" onclick="updateOverlay()">表示</button>
+    </div>
+    <div class="chart-box" style="height:340px"><canvas id="overlayChart"></canvas></div>
+  </div>
+</section>
+
+<!-- COMPARISON TABLE -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(245,158,11,.1);color:var(--orange)">📋</div>
+    <h2>年度別比較表</h2>
+  </div>
+  <div class="card" style="overflow-x:auto">
+    <table class="tbl" id="compTable">
+      <thead>
+        <tr>
+          <th>年度</th>
+          <th colspan="3" style="text-align:center;background:rgba(79,140,255,.08)">🔵 藍住校</th>
+          <th colspan="3" style="text-align:center;background:rgba(34,197,94,.08)">🟢 北島中央校</th>
+          <th colspan="2" style="text-align:center">差異</th>
+        </tr>
+        <tr>
+          <th></th>
+          <th style="background:rgba(79,140,255,.05)">生徒数</th><th style="background:rgba(79,140,255,.05)">年間売上</th><th style="background:rgba(79,140,255,.05)">単価</th>
+          <th style="background:rgba(34,197,94,.05)">生徒数</th><th style="background:rgba(34,197,94,.05)">年間売上</th><th style="background:rgba(34,197,94,.05)">単価</th>
+          <th>売上差</th><th>生徒差</th>
+        </tr>
+      </thead>
+      <tbody id="compBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- OBJECTIVE ANALYSIS -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(6,182,212,.1);color:var(--cyan)">🔍</div>
+    <h2>客観的分析レポート</h2>
+  </div>
+  <div class="card" id="analysisCard"></div>
+</section>
+
+<!-- ADVICE -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(236,72,153,.1);color:var(--pink)">💡</div>
+    <h2>売上向上のためのヒント＆アドバイス</h2>
+  </div>
+  <div class="advice-grid">
+    <div class="advice critical">
+      <h4>🚨 最優先: 北島校の生徒数回復</h4>
+      <p>北島校はピーク<span class="hl num">51名</span>（2021/08）→現在<span class="hl num">31名</span>と<span class="hl">39%減</span>。生徒数回復が最重要課題。</p>
+      <ul>
+        <li>地域密着型の口コミ・紹介キャンペーンの強化</li>
+        <li>近隣中学校の定期テスト対策イベントで新規接点創出</li>
+        <li>既存生徒の退塾予防（面談頻度UP、満足度調査）</li>
+        <li>北島中央小・北島中学への集中的なチラシ配布</li>
+      </ul>
+    </div>
+    <div class="advice growth">
+      <h4>📈 藍住校の単価戦略を北島校に展開</h4>
+      <p>藍住校は生徒単価<span class="hl num">¥39,118</span>に対し、北島校は<span class="hl num">¥27,543</span>。差額<span class="hl">¥11,575/人月</span>。</p>
+      <ul>
+        <li>藍住校の「学習サポート費」モデルの導入可能性を検討</li>
+        <li>コース追加（英検対策・プログラミングなど）による単価UP</li>
+        <li>季節講習の受講率向上→通常月の単価底上げ</li>
+        <li>現在31名×¥11,575 = <span class="hl">月¥35.9万の増収ポテンシャル</span></li>
+      </ul>
+    </div>
+    <div class="advice strategy">
+      <h4>🎯 両校の「8月効果」を最大化</h4>
+      <p>両校とも<span class="hl">7-8月に生徒数・売上がピーク</span>になる明確な季節パターンあり。夏期講習が最大の収益機会。</p>
+      <ul>
+        <li>5月からの早期申込割引で夏期講習の参加率を最大化</li>
+        <li>夏期講習からの正規入会ルートを確立（体験→入会パッケージ）</li>
+        <li>夏期のみ参加の生徒を9月以降の継続に繋げるフォロー施策</li>
+      </ul>
+    </div>
+    <div class="advice optimize">
+      <h4>⚡ 2-3月の退塾を最小化する</h4>
+      <p>毎年<span class="hl">2-3月に生徒数が急減</span>。卒業は避けられないが、在校生の退塾を防ぐことで年度切り替えの売上減を緩和。</p>
+      <ul>
+        <li>12月から次年度の目標設定面談を実施</li>
+        <li>年度継続特典（教材費割引等）による継続インセンティブ</li>
+        <li>新高校1年生向けの「高校準備講座」で中3→高1のブリッジ</li>
+      </ul>
+    </div>
+    <div class="advice insight">
+      <h4>🧠 データから見える「適正規模」</h4>
+      <p>北島校は<span class="hl">25-35名規模</span>が運営効率の観点で最適。藍住校は<span class="hl">35-45名規模</span>。</p>
+      <ul>
+        <li>北島校: 35名×¥30,000 = 月¥105万が現実的目標</li>
+        <li>藍住校: 40名×¥39,000 = 月¥156万が達成圏内</li>
+        <li>2校合計で<span class="hl">月¥260万・年¥3,120万</span>が目標ライン</li>
+        <li>講師配置・教室稼働率の最適化も並行して検討</li>
+      </ul>
+    </div>
+    <div class="advice compare">
+      <h4>🔗 校舎間シナジーの活用</h4>
+      <p>2校の距離が近いため、<span class="hl">リソース共有</span>による効率化が可能。</p>
+      <ul>
+        <li>優秀講師の校舎間シェアリング（移動負担を考慮）</li>
+        <li>合同模試・イベントの開催でスケールメリット</li>
+        <li>藍住校の成功事例（学習サポート費等）の北島校への水平展開</li>
+        <li>統一ブランディングによる地域認知度の向上</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Revenue Projection -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(79,140,255,.1);color:var(--az)">🔮</div>
+    <h2>売上改善シミュレーション</h2>
+  </div>
+  <div class="card">
+    <div class="card-title">📊 現状維持 vs 改善シナリオ（年間ベース）</div>
+    <div class="chart-box" style="height:300px"><canvas id="simChart"></canvas></div>
+    <div style="margin-top:16px;font-size:.8rem;color:var(--t2)">
+      <p>🔴 <b>現状維持</b>: 現在の生徒数・単価が継続した場合（藍住37名×¥39k + 北島31名×¥27.5k = 年約¥2,770万）</p>
+      <p>🟡 <b>改善①</b>: 北島校の生徒数を35名に回復（+約¥130万/年）</p>
+      <p>🟢 <b>改善②</b>: ①に加え、北島校の単価を¥30kに引上げ（+更に約¥105万/年）</p>
+      <p>🔵 <b>目標</b>: 両校で年間¥3,120万達成（藍住40名×¥39k + 北島35名×¥30k）</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+<div class="container">
+  <p>ベストワン 藍住校・北島中央校 ｜ 校舎比較ダッシュボード ｜ 社内資料 ｜ 2026年4月2日作成</p>
+</div>
+</footer>
+
+<script>
+const AZ = [
+  {ym:'2015/09',fy:2015,m:9,s:7,v:170148,e:0},
+  {ym:'2015/10',fy:2015,m:10,s:13,v:275520,e:0},
+  {ym:'2015/11',fy:2015,m:11,s:13,v:278868,e:0},
+  {ym:'2015/12',fy:2015,m:12,s:13,v:278868,e:0},
+  {ym:'2016/01',fy:2015,m:1,s:14,v:292128,e:10800},
+  {ym:'2016/02',fy:2015,m:2,s:19,v:381108,e:0},
+  {ym:'2016/03',fy:2015,m:3,s:28,v:703380,e:0},
+  {ym:'2016/04',fy:2016,m:4,s:30,v:607104,e:16200},
+  {ym:'2016/05',fy:2016,m:5,s:30,v:610884,e:0},
+  {ym:'2016/06',fy:2016,m:6,s:30,v:602460,e:0},
+  {ym:'2016/07',fy:2016,m:7,s:30,v:602460,e:0},
+  {ym:'2016/08',fy:2016,m:8,s:36,v:839538,e:21600},
+  {ym:'2016/09',fy:2016,m:9,s:36,v:853038,e:0},
+  {ym:'2016/10',fy:2016,m:10,s:37,v:885306,e:21600},
+  {ym:'2016/11',fy:2016,m:11,s:37,v:885306,e:0},
+  {ym:'2016/12',fy:2016,m:12,s:40,v:1039350,e:54000},
+  {ym:'2017/01',fy:2016,m:1,s:42,v:1106082,e:0},
+  {ym:'2017/02',fy:2016,m:2,s:39,v:836640,e:0},
+  {ym:'2017/03',fy:2016,m:3,s:42,v:1040472,e:16200},
+  {ym:'2017/04',fy:2017,m:4,s:40,v:1003584,e:0},
+  {ym:'2017/05',fy:2017,m:5,s:42,v:1030968,e:0},
+  {ym:'2017/06',fy:2017,m:6,s:40,v:1029252,e:10800},
+  {ym:'2017/07',fy:2017,m:7,s:40,v:1029252,e:0},
+  {ym:'2017/08',fy:2017,m:8,s:49,v:1254108,e:21600},
+  {ym:'2017/09',fy:2017,m:9,s:53,v:1296888,e:54000},
+  {ym:'2017/10',fy:2017,m:10,s:54,v:1366092,e:10800},
+  {ym:'2017/11',fy:2017,m:11,s:54,v:1363284,e:21600},
+  {ym:'2017/12',fy:2017,m:12,s:59,v:1525380,e:0},
+  {ym:'2018/01',fy:2017,m:1,s:56,v:1444668,e:0},
+  {ym:'2018/02',fy:2017,m:2,s:54,v:1380672,e:0},
+  {ym:'2018/03',fy:2017,m:3,s:59,v:1474872,e:37800},
+  {ym:'2018/04',fy:2018,m:4,s:56,v:1418244,e:0},
+  {ym:'2018/05',fy:2018,m:5,s:57,v:1450674,e:21600},
+  {ym:'2018/06',fy:2018,m:6,s:56,v:1431690,e:0},
+  {ym:'2018/07',fy:2018,m:7,s:54,v:1386324,e:0},
+  {ym:'2018/08',fy:2018,m:8,s:53,v:1401468,e:0},
+  {ym:'2018/09',fy:2018,m:9,s:55,v:1522596,e:43200},
+  {ym:'2018/10',fy:2018,m:10,s:56,v:1575384,e:32400},
+  {ym:'2018/11',fy:2018,m:11,s:56,v:1582728,e:0},
+  {ym:'2018/12',fy:2018,m:12,s:59,v:1649616,e:0},
+  {ym:'2019/01',fy:2018,m:1,s:59,v:1659552,e:10800},
+  {ym:'2019/02',fy:2018,m:2,s:57,v:1570608,e:0},
+  {ym:'2019/03',fy:2018,m:3,s:58,v:1551432,e:0},
+  {ym:'2019/04',fy:2019,m:4,s:58,v:1532532,e:0},
+  {ym:'2019/05',fy:2019,m:5,s:60,v:1634760,e:16200},
+  {ym:'2019/06',fy:2019,m:6,s:60,v:1616508,e:0},
+  {ym:'2019/07',fy:2019,m:7,s:59,v:1599684,e:0},
+  {ym:'2019/08',fy:2019,m:8,s:62,v:1638924,e:0},
+  {ym:'2019/09',fy:2019,m:9,s:63,v:1716970,e:11000},
+  {ym:'2019/10',fy:2019,m:10,s:62,v:1698080,e:0},
+  {ym:'2019/11',fy:2019,m:11,s:61,v:1684965,e:0},
+  {ym:'2019/12',fy:2019,m:12,s:62,v:1704735,e:0},
+  {ym:'2020/01',fy:2019,m:1,s:60,v:1664755,e:0},
+  {ym:'2020/02',fy:2019,m:2,s:56,v:1541345,e:0},
+  {ym:'2020/03',fy:2019,m:3,s:61,v:1643440,e:0},
+  {ym:'2020/04',fy:2020,m:4,s:62,v:1725140,e:5500},
+  {ym:'2020/05',fy:2020,m:5,s:60,v:1706280,e:5500},
+  {ym:'2020/06',fy:2020,m:6,s:60,v:1731690,e:0},
+  {ym:'2020/07',fy:2020,m:7,s:61,v:1809100,e:22000},
+  {ym:'2020/08',fy:2020,m:8,s:64,v:1881280,e:0},
+  {ym:'2020/09',fy:2020,m:9,s:68,v:2012610,e:22000},
+  {ym:'2020/10',fy:2020,m:10,s:68,v:2059030,e:22000},
+  {ym:'2020/11',fy:2020,m:11,s:68,v:2059030,e:0},
+  {ym:'2020/12',fy:2020,m:12,s:65,v:2002800,e:0},
+  {ym:'2021/01',fy:2020,m:1,s:68,v:2142520,e:0},
+  {ym:'2021/02',fy:2020,m:2,s:61,v:1856950,e:0},
+  {ym:'2021/03',fy:2020,m:3,s:57,v:1706040,e:0},
+  {ym:'2021/04',fy:2021,m:4,s:56,v:1689570,e:22000},
+  {ym:'2021/05',fy:2021,m:5,s:54,v:1629680,e:0},
+  {ym:'2021/06',fy:2021,m:6,s:54,v:1656080,e:0},
+  {ym:'2021/07',fy:2021,m:7,s:54,v:1641010,e:0},
+  {ym:'2021/08',fy:2021,m:8,s:56,v:1791210,e:22000},
+  {ym:'2021/09',fy:2021,m:9,s:55,v:1796630,e:0},
+  {ym:'2021/10',fy:2021,m:10,s:55,v:1804330,e:0},
+  {ym:'2021/11',fy:2021,m:11,s:55,v:1804330,e:0},
+  {ym:'2021/12',fy:2021,m:12,s:59,v:1934010,e:0},
+  {ym:'2022/01',fy:2021,m:1,s:58,v:1937780,e:0},
+  {ym:'2022/02',fy:2021,m:2,s:57,v:1813290,e:0},
+  {ym:'2022/03',fy:2021,m:3,s:68,v:2039450,e:0},
+  {ym:'2022/04',fy:2022,m:4,s:71,v:2125270,e:0},
+  {ym:'2022/05',fy:2022,m:5,s:73,v:2130380,e:22000},
+  {ym:'2022/06',fy:2022,m:6,s:73,v:2128290,e:5500},
+  {ym:'2022/07',fy:2022,m:7,s:72,v:2063750,e:0},
+  {ym:'2022/08',fy:2022,m:8,s:78,v:2202060,e:0},
+  {ym:'2022/09',fy:2022,m:9,s:76,v:2159660,e:0},
+  {ym:'2022/10',fy:2022,m:10,s:74,v:2131010,e:0},
+  {ym:'2022/11',fy:2022,m:11,s:71,v:2055640,e:0},
+  {ym:'2022/12',fy:2022,m:12,s:72,v:2028770,e:0},
+  {ym:'2023/01',fy:2022,m:1,s:71,v:2007790,e:0},
+  {ym:'2023/02',fy:2022,m:2,s:63,v:1797490,e:0},
+  {ym:'2023/03',fy:2022,m:3,s:62,v:1831950,e:0},
+  {ym:'2023/04',fy:2023,m:4,s:62,v:1883090,e:0},
+  {ym:'2023/05',fy:2023,m:5,s:68,v:2058870,e:0},
+  {ym:'2023/06',fy:2023,m:6,s:65,v:2028180,e:0},
+  {ym:'2023/07',fy:2023,m:7,s:66,v:2048970,e:0},
+  {ym:'2023/08',fy:2023,m:8,s:67,v:2040940,e:0},
+  {ym:'2023/09',fy:2023,m:9,s:70,v:2130040,e:0},
+  {ym:'2023/10',fy:2023,m:10,s:71,v:2207370,e:0},
+  {ym:'2023/11',fy:2023,m:11,s:71,v:2137300,e:0},
+  {ym:'2023/12',fy:2023,m:12,s:71,v:2132750,e:0},
+  {ym:'2024/01',fy:2023,m:1,s:65,v:1976950,e:0},
+  {ym:'2024/02',fy:2023,m:2,s:54,v:1659160,e:0},
+  {ym:'2024/03',fy:2023,m:3,s:56,v:1697930,e:0},
+  {ym:'2024/04',fy:2024,m:4,s:56,v:1756810,e:0},
+  {ym:'2024/05',fy:2024,m:5,s:58,v:1797840,e:0},
+  {ym:'2024/06',fy:2024,m:6,s:59,v:1868680,e:0},
+  {ym:'2024/07',fy:2024,m:7,s:58,v:1828970,e:0},
+  {ym:'2024/08',fy:2024,m:8,s:52,v:1693120,e:0},
+  {ym:'2024/09',fy:2024,m:9,s:52,v:1715560,e:11000},
+  {ym:'2024/10',fy:2024,m:10,s:52,v:1689490,e:0},
+  {ym:'2024/11',fy:2024,m:11,s:53,v:1809720,e:0},
+  {ym:'2024/12',fy:2024,m:12,s:52,v:1771880,e:0},
+  {ym:'2025/01',fy:2024,m:1,s:52,v:1700160,e:0},
+  {ym:'2025/02',fy:2024,m:2,s:48,v:1542640,e:0},
+  {ym:'2025/03',fy:2024,m:3,s:41,v:1270390,e:0},
+  {ym:'2025/04',fy:2025,m:4,s:39,v:1247624,e:99000},
+  {ym:'2025/05',fy:2025,m:5,s:41,v:1328754,e:88000},
+  {ym:'2025/06',fy:2025,m:6,s:42,v:1381056,e:33000},
+  {ym:'2025/07',fy:2025,m:7,s:42,v:1364476,e:0},
+  {ym:'2025/08',fy:2025,m:8,s:42,v:1364476,e:0},
+  {ym:'2025/09',fy:2025,m:9,s:45,v:1489448,e:66000},
+  {ym:'2025/10',fy:2025,m:10,s:47,v:1558368,e:44000},
+  {ym:'2025/11',fy:2025,m:11,s:48,v:1565418,e:22000},
+  {ym:'2025/12',fy:2025,m:12,s:48,v:1581872,e:0},
+  {ym:'2026/01',fy:2025,m:1,s:48,v:1625432,e:0},
+  {ym:'2026/02',fy:2025,m:2,s:47,v:1580140,e:0},
+  {ym:'2026/03',fy:2025,m:3,s:41,v:1316748,e:0},
+  {ym:'2026/04',fy:2026,m:4,s:37,v:1447355,e:132000},
+];
+
+const KJ = [
+  {ym:'2013/01',fy:2012,m:1,s:3,v:66000,e:0},
+  {ym:'2013/02',fy:2012,m:2,s:3,v:66000,e:0},
+  {ym:'2013/03',fy:2012,m:3,s:11,v:242280,e:0},
+  {ym:'2013/04',fy:2013,m:4,s:14,v:309120,e:0},
+  {ym:'2013/05',fy:2013,m:5,s:15,v:361920,e:0},
+  {ym:'2013/06',fy:2013,m:6,s:15,v:361920,e:0},
+  {ym:'2013/07',fy:2013,m:7,s:13,v:336435,e:0},
+  {ym:'2013/08',fy:2013,m:8,s:20,v:486300,e:0},
+  {ym:'2013/09',fy:2013,m:9,s:19,v:455835,e:0},
+  {ym:'2013/10',fy:2013,m:10,s:18,v:438525,e:0},
+  {ym:'2013/11',fy:2013,m:11,s:18,v:438525,e:0},
+  {ym:'2013/12',fy:2013,m:12,s:22,v:577065,e:0},
+  {ym:'2014/01',fy:2013,m:1,s:25,v:681620,e:0},
+  {ym:'2014/02',fy:2013,m:2,s:23,v:605610,e:0},
+  {ym:'2014/03',fy:2013,m:3,s:27,v:710100,e:10800},
+  {ym:'2014/04',fy:2014,m:4,s:29,v:778740,e:21600},
+  {ym:'2014/05',fy:2014,m:5,s:33,v:896364,e:32400},
+  {ym:'2014/06',fy:2014,m:6,s:32,v:905784,e:0},
+  {ym:'2014/07',fy:2014,m:7,s:31,v:884640,e:0},
+  {ym:'2014/08',fy:2014,m:8,s:37,v:1035804,e:0},
+  {ym:'2014/09',fy:2014,m:9,s:35,v:997188,e:0},
+  {ym:'2014/10',fy:2014,m:10,s:33,v:959868,e:0},
+  {ym:'2014/11',fy:2014,m:11,s:35,v:994812,e:5400},
+  {ym:'2014/12',fy:2014,m:12,s:39,v:1173456,e:0},
+  {ym:'2015/01',fy:2014,m:1,s:41,v:1194684,e:0},
+  {ym:'2015/02',fy:2014,m:2,s:40,v:1172028,e:0},
+  {ym:'2015/03',fy:2014,m:3,s:29,v:700764,e:0},
+  {ym:'2015/04',fy:2015,m:4,s:29,v:731976,e:0},
+  {ym:'2015/05',fy:2015,m:5,s:31,v:771456,e:0},
+  {ym:'2015/06',fy:2015,m:6,s:31,v:796944,e:0},
+  {ym:'2015/07',fy:2015,m:7,s:27,v:670896,e:0},
+  {ym:'2015/08',fy:2015,m:8,s:31,v:749640,e:0},
+  {ym:'2015/09',fy:2015,m:9,s:28,v:686424,e:0},
+  {ym:'2015/10',fy:2015,m:10,s:24,v:645696,e:0},
+  {ym:'2015/11',fy:2015,m:11,s:23,v:640212,e:0},
+  {ym:'2015/12',fy:2015,m:12,s:23,v:640212,e:0},
+  {ym:'2016/01',fy:2015,m:1,s:23,v:640212,e:0},
+  {ym:'2016/02',fy:2015,m:2,s:24,v:682578,e:0},
+  {ym:'2016/03',fy:2015,m:3,s:24,v:606519,e:21600},
+  {ym:'2016/04',fy:2016,m:4,s:24,v:606519,e:0},
+  {ym:'2016/05',fy:2016,m:5,s:23,v:589695,e:0},
+  {ym:'2016/06',fy:2016,m:6,s:23,v:589695,e:0},
+  {ym:'2016/07',fy:2016,m:7,s:23,v:589695,e:0},
+  {ym:'2016/08',fy:2016,m:8,s:29,v:740211,e:0},
+  {ym:'2016/09',fy:2016,m:9,s:28,v:698331,e:0},
+  {ym:'2016/10',fy:2016,m:10,s:29,v:750579,e:21600},
+  {ym:'2016/11',fy:2016,m:11,s:29,v:757815,e:0},
+  {ym:'2016/12',fy:2016,m:12,s:33,v:886131,e:10800},
+  {ym:'2017/01',fy:2016,m:1,s:31,v:837201,e:0},
+  {ym:'2017/02',fy:2016,m:2,s:26,v:732021,e:0},
+  {ym:'2017/03',fy:2016,m:3,s:26,v:629637,e:43200},
+  {ym:'2017/04',fy:2017,m:4,s:24,v:619857,e:0},
+  {ym:'2017/05',fy:2017,m:5,s:24,v:597177,e:10800},
+  {ym:'2017/06',fy:2017,m:6,s:24,v:605061,e:0},
+  {ym:'2017/07',fy:2017,m:7,s:23,v:587589,e:0},
+  {ym:'2017/08',fy:2017,m:8,s:27,v:769581,e:0},
+  {ym:'2017/09',fy:2017,m:9,s:26,v:764853,e:0},
+  {ym:'2017/10',fy:2017,m:10,s:25,v:745113,e:0},
+  {ym:'2017/11',fy:2017,m:11,s:26,v:762909,e:0},
+  {ym:'2017/12',fy:2017,m:12,s:28,v:800013,e:10800},
+  {ym:'2018/01',fy:2017,m:1,s:28,v:800013,e:0},
+  {ym:'2018/02',fy:2017,m:2,s:24,v:619533,e:0},
+  {ym:'2018/03',fy:2017,m:3,s:22,v:536205,e:32400},
+  {ym:'2018/04',fy:2018,m:4,s:21,v:513657,e:10800},
+  {ym:'2018/05',fy:2018,m:5,s:23,v:557997,e:0},
+  {ym:'2018/06',fy:2018,m:6,s:23,v:557997,e:0},
+  {ym:'2018/07',fy:2018,m:7,s:23,v:557997,e:0},
+  {ym:'2018/08',fy:2018,m:8,s:37,v:1016661,e:0},
+  {ym:'2018/09',fy:2018,m:9,s:37,v:1016661,e:0},
+  {ym:'2018/10',fy:2018,m:10,s:35,v:977937,e:0},
+  {ym:'2018/11',fy:2018,m:11,s:35,v:1007205,e:10800},
+  {ym:'2018/12',fy:2018,m:12,s:39,v:1082601,e:21600},
+  {ym:'2019/01',fy:2018,m:1,s:36,v:978129,e:0},
+  {ym:'2019/02',fy:2018,m:2,s:33,v:888993,e:0},
+  {ym:'2019/03',fy:2018,m:3,s:37,v:992928,e:21600},
+  {ym:'2019/04',fy:2019,m:4,s:37,v:987204,e:5400},
+  {ym:'2019/05',fy:2019,m:5,s:38,v:1031460,e:0},
+  {ym:'2019/06',fy:2019,m:6,s:38,v:1045284,e:0},
+  {ym:'2019/07',fy:2019,m:7,s:38,v:1045284,e:0},
+  {ym:'2019/08',fy:2019,m:8,s:43,v:1113420,e:21600},
+  {ym:'2019/09',fy:2019,m:9,s:44,v:1172600,e:0},
+  {ym:'2019/10',fy:2019,m:10,s:42,v:1164300,e:0},
+  {ym:'2019/11',fy:2019,m:11,s:42,v:1164300,e:0},
+  {ym:'2019/12',fy:2019,m:12,s:44,v:1207910,e:0},
+  {ym:'2020/01',fy:2019,m:1,s:43,v:1187150,e:0},
+  {ym:'2020/02',fy:2019,m:2,s:38,v:1000300,e:0},
+  {ym:'2020/03',fy:2019,m:3,s:38,v:1021090,e:0},
+  {ym:'2020/04',fy:2020,m:4,s:36,v:1011498,e:22000},
+  {ym:'2020/05',fy:2020,m:5,s:39,v:1142968,e:0},
+  {ym:'2020/06',fy:2020,m:6,s:39,v:1109418,e:0},
+  {ym:'2020/07',fy:2020,m:7,s:39,v:1109418,e:0},
+  {ym:'2020/08',fy:2020,m:8,s:42,v:1204038,e:0},
+  {ym:'2020/09',fy:2020,m:9,s:45,v:1295798,e:0},
+  {ym:'2020/10',fy:2020,m:10,s:44,v:1278448,e:0},
+  {ym:'2020/11',fy:2020,m:11,s:44,v:1278448,e:0},
+  {ym:'2020/12',fy:2020,m:12,s:46,v:1424358,e:0},
+  {ym:'2021/01',fy:2020,m:1,s:44,v:1296378,e:0},
+  {ym:'2021/02',fy:2020,m:2,s:39,v:1092120,e:0},
+  {ym:'2021/03',fy:2020,m:3,s:43,v:1256010,e:0},
+  {ym:'2021/04',fy:2021,m:4,s:44,v:1255870,e:55000},
+  {ym:'2021/05',fy:2021,m:5,s:44,v:1276605,e:0},
+  {ym:'2021/06',fy:2021,m:6,s:46,v:1352555,e:0},
+  {ym:'2021/07',fy:2021,m:7,s:46,v:1333635,e:0},
+  {ym:'2021/08',fy:2021,m:8,s:51,v:1428855,e:27500},
+  {ym:'2021/09',fy:2021,m:9,s:50,v:1408535,e:0},
+  {ym:'2021/10',fy:2021,m:10,s:49,v:1386125,e:0},
+  {ym:'2021/11',fy:2021,m:11,s:50,v:1390935,e:0},
+  {ym:'2021/12',fy:2021,m:12,s:50,v:1376525,e:0},
+  {ym:'2022/01',fy:2021,m:1,s:46,v:1268185,e:0},
+  {ym:'2022/02',fy:2021,m:2,s:45,v:1251055,e:0},
+  {ym:'2022/03',fy:2021,m:3,s:43,v:1167020,e:11000},
+  {ym:'2022/04',fy:2022,m:4,s:41,v:1085460,e:0},
+  {ym:'2022/05',fy:2022,m:5,s:42,v:1104790,e:0},
+  {ym:'2022/06',fy:2022,m:6,s:43,v:1123020,e:0},
+  {ym:'2022/07',fy:2022,m:7,s:43,v:1123020,e:0},
+  {ym:'2022/08',fy:2022,m:8,s:45,v:1202380,e:0},
+  {ym:'2022/09',fy:2022,m:9,s:45,v:1202380,e:0},
+  {ym:'2022/10',fy:2022,m:10,s:45,v:1175210,e:11000},
+  {ym:'2022/11',fy:2022,m:11,s:44,v:1167870,e:0},
+  {ym:'2022/12',fy:2022,m:12,s:47,v:1236970,e:0},
+  {ym:'2023/01',fy:2022,m:1,s:44,v:1180190,e:0},
+  {ym:'2023/02',fy:2022,m:2,s:39,v:1047790,e:0},
+  {ym:'2023/03',fy:2022,m:3,s:38,v:1129330,e:0},
+  {ym:'2023/04',fy:2023,m:4,s:40,v:1184820,e:0},
+  {ym:'2023/05',fy:2023,m:5,s:40,v:1184820,e:0},
+  {ym:'2023/06',fy:2023,m:6,s:39,v:1147890,e:0},
+  {ym:'2023/07',fy:2023,m:7,s:38,v:1127460,e:0},
+  {ym:'2023/08',fy:2023,m:8,s:41,v:1203820,e:22000},
+  {ym:'2023/09',fy:2023,m:9,s:41,v:1203820,e:0},
+  {ym:'2023/10',fy:2023,m:10,s:41,v:1232310,e:22000},
+  {ym:'2023/11',fy:2023,m:11,s:41,v:1230550,e:0},
+  {ym:'2023/12',fy:2023,m:12,s:44,v:1153460,e:0},
+  {ym:'2024/01',fy:2023,m:1,s:46,v:1208510,e:0},
+  {ym:'2024/02',fy:2023,m:2,s:37,v:1153230,e:0},
+  {ym:'2024/03',fy:2023,m:3,s:30,v:858860,e:0},
+  {ym:'2024/04',fy:2024,m:4,s:31,v:875000,e:0},
+  {ym:'2024/05',fy:2024,m:5,s:32,v:909950,e:0},
+  {ym:'2024/06',fy:2024,m:6,s:32,v:896000,e:0},
+  {ym:'2024/07',fy:2024,m:7,s:33,v:924000,e:0},
+  {ym:'2024/08',fy:2024,m:8,s:34,v:952000,e:0},
+  {ym:'2024/09',fy:2024,m:9,s:37,v:1036000,e:11000},
+  {ym:'2024/10',fy:2024,m:10,s:36,v:1008000,e:0},
+  {ym:'2024/11',fy:2024,m:11,s:37,v:1036000,e:5500},
+  {ym:'2024/12',fy:2024,m:12,s:37,v:1036000,e:0},
+  {ym:'2025/01',fy:2024,m:1,s:37,v:1036000,e:0},
+  {ym:'2025/02',fy:2024,m:2,s:34,v:952000,e:0},
+  {ym:'2025/03',fy:2024,m:3,s:30,v:840000,e:30180},
+  {ym:'2025/04',fy:2025,m:4,s:34,v:878770,e:11000},
+  {ym:'2025/05',fy:2025,m:5,s:36,v:937880,e:0},
+  {ym:'2025/06',fy:2025,m:6,s:37,v:975610,e:0},
+  {ym:'2025/07',fy:2025,m:7,s:36,v:953500,e:0},
+  {ym:'2025/08',fy:2025,m:8,s:35,v:931390,e:0},
+  {ym:'2025/09',fy:2025,m:9,s:37,v:936050,e:5500},
+  {ym:'2025/10',fy:2025,m:10,s:35,v:875250,e:0},
+  {ym:'2025/11',fy:2025,m:11,s:35,v:875250,e:0},
+  {ym:'2025/12',fy:2025,m:12,s:35,v:891830,e:0},
+  {ym:'2026/01',fy:2025,m:1,s:37,v:966790,e:0},
+  {ym:'2026/02',fy:2025,m:2,s:36,v:911290,e:0},
+  {ym:'2026/03',fy:2025,m:3,s:35,v:870790,e:0},
+  {ym:'2026/04',fy:2026,m:4,s:31,v:853860,e:0},
+];
+
+const fmt=n=>'¥'+n.toLocaleString();
+const allFys=[2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
+const months=['4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'];
+const mOrder=[4,5,6,7,8,9,10,11,12,1,2,3];
+Chart.defaults.font.family="'Noto Sans JP',sans-serif";
+Chart.defaults.color='#8b92b0';
+
+function getFy(d){return d.fy}
+function fyData(arr,fy){return arr.filter(d=>getFy(d)===fy)}
+function fyAgg(arr){
+  const r={};
+  arr.forEach(d=>{
+    const f=getFy(d);
+    if(!r[f])r[f]={t:0,s:0,m:0,e:0};
+    r[f].t+=d.v;r[f].s+=d.s;r[f].m++;r[f].e+=d.e;
+  });
+  return r;
+}
+function range(arr,f1,f2){return arr.filter(d=>{const f=getFy(d);return f>=f1&&f<=f2})}
+
+// Populate selects
+const selS=document.getElementById('fyStart'),selE=document.getElementById('fyEnd');
+allFys.forEach(f=>{
+  selS.add(new Option(f+'年度',f));
+  selE.add(new Option(f+'年度',f));
+});
+selS.value=allFys[0];selE.value=allFys[allFys.length-1];
+
+const selO1=document.getElementById('overlayFy1'),selO2=document.getElementById('overlayFy2');
+allFys.forEach(f=>{selO1.add(new Option(f+'年度',f));selO2.add(new Option(f+'年度',f))});
+selO1.value=2024;selO2.value=2025;
+
+function resetRange(){selS.value=allFys[0];selE.value=allFys[allFys.length-1];updateAll()}
+
+let charts={};
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id]}}
+
+function updateAll(){
+  const f1=+selS.value,f2=+selE.value;
+  const metric=document.getElementById('metric').value;
+  const azR=range(AZ,f1,f2),kjR=range(KJ,f1,f2);
+  const azA=fyAgg(azR),kjA=fyAgg(kjR);
+  
+  updateKPIs(azR,kjR,azA,kjA,f1,f2);
+  updateMainChart(azR,kjR,metric);
+  updateFyCharts(azA,kjA,metric);
+  updateCompTable(azA,kjA);
+  updateAnalysis(azA,kjA,f1,f2);
+}
+
+function updateKPIs(azR,kjR,azA,kjA,f1,f2){
+  const azTotal=azR.reduce((s,d)=>s+d.v,0);
+  const kjTotal=kjR.reduce((s,d)=>s+d.v,0);
+  const azStu=azR.length>0?Math.round(azR.reduce((s,d)=>s+d.s,0)/azR.length):0;
+  const kjStu=kjR.length>0?Math.round(kjR.reduce((s,d)=>s+d.s,0)/kjR.length):0;
+  const azUnit=azR.reduce((s,d)=>s+d.s,0)>0?Math.round(azTotal/azR.reduce((s,d)=>s+d.s,0)):0;
+  const kjUnit=kjR.reduce((s,d)=>s+d.s,0)>0?Math.round(kjTotal/kjR.reduce((s,d)=>s+d.s,0)):0;
+  
+  document.getElementById('kpiGrid').innerHTML=`
+    <div class="kpi az"><div class="label">藍住校 期間累計売上</div><div class="val" style="color:var(--az)">${fmt(azTotal)}</div><div class="sub">${f1}〜${f2}年度</div></div>
+    <div class="kpi kj"><div class="label">北島校 期間累計売上</div><div class="val" style="color:var(--kj)">${fmt(kjTotal)}</div><div class="sub">${f1}〜${f2}年度</div></div>
+    <div class="kpi purple"><div class="label">平均生徒数（藍住/北島）</div><div class="val" style="color:var(--purple)">${azStu}名 / ${kjStu}名</div><div class="sub">選択期間の月平均</div></div>
+    <div class="kpi orange"><div class="label">平均単価（藍住/北島）</div><div class="val" style="color:var(--orange)">${fmt(azUnit)} / ${fmt(kjUnit)}</div><div class="sub">差額: ${fmt(Math.abs(azUnit-kjUnit))}</div></div>
+  `;
+}
+
+function getLabel(metric){return metric==='sales'?'売上':metric==='students'?'生徒数':'単価'}
+function getVal(d,metric){
+  if(metric==='sales')return d.v;
+  if(metric==='students')return d.s;
+  return d.s>0?Math.round(d.v/d.s):0;
+}
+
+function updateMainChart(azR,kjR,metric){
+  destroyChart('main');
+  const allLabels=[...new Set([...azR.map(d=>d.ym),...kjR.map(d=>d.ym)])].sort();
+  const azMap=Object.fromEntries(azR.map(d=>[d.ym,d]));
+  const kjMap=Object.fromEntries(kjR.map(d=>[d.ym,d]));
+  
+  const yFmt=metric==='sales'?v=>'¥'+(v/10000).toFixed(0)+'万':metric==='unit'?v=>'¥'+(v/1000).toFixed(0)+'k':v=>v+'名';
+  
+  charts.main=new Chart(document.getElementById('mainChart'),{
+    type:'line',
+    data:{
+      labels:allLabels,
+      datasets:[
+        {label:'藍住校',data:allLabels.map(l=>azMap[l]?getVal(azMap[l],metric):null),borderColor:'#4f8cff',backgroundColor:'rgba(79,140,255,.06)',fill:false,tension:.3,pointRadius:1.5,borderWidth:2.5,spanGaps:false},
+        {label:'北島校',data:allLabels.map(l=>kjMap[l]?getVal(kjMap[l],metric):null),borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,.06)',fill:false,tension:.3,pointRadius:1.5,borderWidth:2.5,spanGaps:false}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#8b92b0',usePointStyle:true}},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>ctx.dataset.label+': '+(metric==='students'?ctx.parsed.y+'名':fmt(ctx.parsed.y))}}},
+      scales:{
+        y:{grid:{color:'rgba(42,48,85,.4)'},ticks:{callback:yFmt}},
+        x:{grid:{display:false},ticks:{maxRotation:45,font:{size:8},maxTicksLimit:40}}
+      }
+    }
+  });
+}
+
+function updateFyCharts(azA,kjA,metric){
+  destroyChart('azFy');destroyChart('kjFy');
+  const makeFyChart=(id,agg,color,bgColor)=>{
+    const fys=Object.keys(agg).map(Number).sort();
+    const getData=f=>{const d=agg[f];if(!d)return 0;if(metric==='sales')return d.t;if(metric==='students')return Math.round(d.s/d.m);return d.s>0?Math.round(d.t/d.s):0};
+    const yFmt=metric==='sales'?v=>'¥'+(v/10000).toFixed(0)+'万':metric==='unit'?v=>'¥'+(v/1000).toFixed(0)+'k':v=>v+'名';
+    charts[id]=new Chart(document.getElementById(id+'Chart'),{
+      type:'bar',
+      data:{labels:fys.map(f=>f+'年度'),datasets:[{data:fys.map(getData),backgroundColor:bgColor,borderColor:color,borderWidth:1,borderRadius:6,barPercentage:.65}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>metric==='students'?ctx.parsed.y+'名':fmt(ctx.parsed.y)}}},scales:{y:{grid:{color:'rgba(42,48,85,.4)'},ticks:{callback:yFmt},beginAtZero:true},x:{grid:{display:false},ticks:{font:{size:9}}}}}
+    });
+  };
+  makeFyChart('azFy',azA,'#4f8cff','rgba(79,140,255,.45)');
+  makeFyChart('kjFy',kjA,'#22c55e','rgba(34,197,94,.45)');
+}
+
+function updateCompTable(azA,kjA){
+  const fys=[...new Set([...Object.keys(azA),...Object.keys(kjA)])].map(Number).sort();
+  let html='';
+  fys.forEach(f=>{
+    const a=azA[f]||{t:0,s:0,m:1,e:0};
+    const k=kjA[f]||{t:0,s:0,m:1,e:0};
+    const aAvg=Math.round(a.s/a.m);const kAvg=Math.round(k.s/k.m);
+    const aUnit=a.s>0?Math.round(a.t/a.s):0;const kUnit=k.s>0?Math.round(k.t/k.s):0;
+    const diff=a.t-k.t;const sDiff=aAvg-kAvg;
+    const winner=a.t>k.t?'az':'kj';
+    html+=`<tr>
+      <td>${f}年度</td>
+      <td style="color:var(--az)">${a.t>0?aAvg+'名':'—'}</td>
+      <td style="color:var(--az)" class="${winner==='az'?'winner':''}">${a.t>0?fmt(a.t):'—'}</td>
+      <td style="color:var(--az)">${aUnit>0?fmt(aUnit):'—'}</td>
+      <td style="color:var(--kj)">${k.t>0?kAvg+'名':'—'}</td>
+      <td style="color:var(--kj)" class="${winner==='kj'?'winner':''}">${k.t>0?fmt(k.t):'—'}</td>
+      <td style="color:var(--kj)">${kUnit>0?fmt(kUnit):'—'}</td>
+      <td class="${diff>0?'up':'down'}">${a.t>0&&k.t>0?(diff>0?'+':'')+fmt(diff):'—'}</td>
+      <td class="${sDiff>0?'up':'down'}">${a.t>0&&k.t>0?(sDiff>0?'+':'')+sDiff+'名':'—'}</td>
+    </tr>`;
+  });
+  document.getElementById('compBody').innerHTML=html;
+}
+
+function updateAnalysis(azA,kjA,f1,f2){
+  // Compute key metrics
+  const recentFys=[2023,2024,2025].filter(f=>f>=f1&&f<=f2);
+  const azRecent=recentFys.map(f=>azA[f]).filter(Boolean);
+  const kjRecent=recentFys.map(f=>kjA[f]).filter(Boolean);
+  
+  const azPeakFy=Object.entries(azA).reduce((a,b)=>b[1].t>a[1].t?b:a,['0',{t:0}]);
+  const kjPeakFy=Object.entries(kjA).reduce((a,b)=>b[1].t>a[1].t?b:a,['0',{t:0}]);
+  
+  const latestAz=AZ[AZ.length-1];
+  const latestKj=KJ[KJ.length-1];
+  
+  const azTrend=azRecent.length>=2?(azRecent[azRecent.length-1].t-azRecent[0].t)/azRecent[0].t*100:0;
+  const kjTrend=kjRecent.length>=2?(kjRecent[kjRecent.length-1].t-kjRecent[0].t)/kjRecent[0].t*100:0;
+  
+  document.getElementById('analysisCard').innerHTML=`
+    <div style="font-size:.88rem;line-height:1.9;color:var(--t2)">
+      <h3 style="font-size:1.05rem;font-weight:700;color:var(--t1);margin-bottom:16px">📊 2校の経営状態 客観レポート</h3>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+        <div style="background:rgba(79,140,255,.05);border:1px solid rgba(79,140,255,.15);border-radius:10px;padding:16px">
+          <h4 style="color:var(--az);font-size:.9rem;margin-bottom:8px">🔵 藍住校の現状</h4>
+          <p>最新月: <span style="color:var(--t1);font-weight:700">${latestAz.s}名・${fmt(latestAz.v)}</span></p>
+          <p>生徒単価: <span style="color:var(--t1);font-weight:700">${fmt(Math.round(latestAz.v/latestAz.s))}</span>（全社トップ水準）</p>
+          <p>年間ピーク: ${azPeakFy[0]}年度 ${fmt(azPeakFy[1].t)}</p>
+          <p>直近トレンド: <span class="${azTrend>=0?'up':'down'}">${azTrend>=0?'▲':'▼'} ${Math.abs(azTrend).toFixed(1)}%</span></p>
+        </div>
+        <div style="background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.15);border-radius:10px;padding:16px">
+          <h4 style="color:var(--kj);font-size:.9rem;margin-bottom:8px">🟢 北島中央校の現状</h4>
+          <p>最新月: <span style="color:var(--t1);font-weight:700">${latestKj.s}名・${fmt(latestKj.v)}</span></p>
+          <p>生徒単価: <span style="color:var(--t1);font-weight:700">${fmt(Math.round(latestKj.v/latestKj.s))}</span></p>
+          <p>年間ピーク: ${kjPeakFy[0]}年度 ${fmt(kjPeakFy[1].t)}</p>
+          <p>直近トレンド: <span class="${kjTrend>=0?'up':'down'}">${kjTrend>=0?'▲':'▼'} ${Math.abs(kjTrend).toFixed(1)}%</span></p>
+        </div>
+      </div>
+      
+      <h4 style="color:var(--t1);font-weight:600;margin:16px 0 8px">🔑 重要な分析ポイント</h4>
+      <div style="background:var(--card2);border-radius:8px;padding:16px;margin-bottom:12px">
+        <p>1️⃣ <b style="color:var(--t1)">単価格差の拡大</b>: 藍住校の学習サポート費導入により、単価差が<span style="color:var(--orange);font-weight:700">¥${Math.abs(Math.round(latestAz.v/latestAz.s)-Math.round(latestKj.v/latestKj.s)).toLocaleString()}</span>に拡大。北島校は授業調整費なしで運営しているため、同一単価策を導入せず独自の付加価値戦略が必要。</p>
+      </div>
+      <div style="background:var(--card2);border-radius:8px;padding:16px;margin-bottom:12px">
+        <p>2️⃣ <b style="color:var(--t1)">生徒数の二極化</b>: 藍住校は${latestAz.s}名で横ばい〜緩やかな改善傾向。北島校は${latestKj.s}名でピークの61%まで減少。新規獲得と退塾防止の両面でてこ入れが必要。</p>
+      </div>
+      <div style="background:var(--card2);border-radius:8px;padding:16px;margin-bottom:12px">
+        <p>3️⃣ <b style="color:var(--t1)">合計売上</b>: 2校合計の月間売上は約<span style="color:var(--az);font-weight:700">${fmt(latestAz.v+latestKj.v)}</span>（年換算${fmt((latestAz.v+latestKj.v)*12)}）。ピーク時と比較すると回復の余地あり。</p>
+      </div>
+      <div style="background:var(--card2);border-radius:8px;padding:16px">
+        <p>4️⃣ <b style="color:var(--t1)">季節変動パターン</b>: 両校とも7-8月にピーク、2-3月に底を打つ同一パターン。この予測可能な変動を活かした先手の施策（4月の新規キャンペーン、12月の継続面談）が効果的。</p>
+      </div>
+    </div>
+  `;
+}
+
+// Overlay chart
+function updateOverlay(){
+  destroyChart('overlay');
+  const fy1=+document.getElementById('overlayFy1').value;
+  const fy2=+document.getElementById('overlayFy2').value;
+  
+  const getMonthlyData=(arr,fy)=>{
+    const fd=fyData(arr,fy);
+    return mOrder.map(m=>{const d=fd.find(x=>x.m===m);return d?d.v:null});
+  };
+  
+  const metric=document.getElementById('metric').value;
+  const getV=(arr,fy)=>{
+    const fd=fyData(arr,fy);
+    return mOrder.map(m=>{
+      const d=fd.find(x=>x.m===m);
+      if(!d)return null;
+      return getVal(d,metric);
+    });
+  };
+  
+  const yFmt=metric==='sales'?v=>'¥'+(v/10000).toFixed(0)+'万':metric==='unit'?v=>'¥'+(v/1000).toFixed(0)+'k':v=>v+'名';
+  
+  charts.overlay=new Chart(document.getElementById('overlayChart'),{
+    type:'line',
+    data:{
+      labels:months,
+      datasets:[
+        {label:`藍住 ${fy1}年度`,data:getV(AZ,fy1),borderColor:'#4f8cff',borderDash:[],tension:.3,pointRadius:4,borderWidth:2.5},
+        {label:`藍住 ${fy2}年度`,data:getV(AZ,fy2),borderColor:'#93bbff',borderDash:[6,4],tension:.3,pointRadius:4,borderWidth:2.5},
+        {label:`北島 ${fy1}年度`,data:getV(KJ,fy1),borderColor:'#22c55e',borderDash:[],tension:.3,pointRadius:4,borderWidth:2.5},
+        {label:`北島 ${fy2}年度`,data:getV(KJ,fy2),borderColor:'#86efac',borderDash:[6,4],tension:.3,pointRadius:4,borderWidth:2.5}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#8b92b0',usePointStyle:true}},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>ctx.dataset.label+': '+(metric==='students'?ctx.parsed.y+'名':fmt(ctx.parsed.y))}}},
+      scales:{y:{grid:{color:'rgba(42,48,85,.4)'},ticks:{callback:yFmt}},x:{grid:{color:'rgba(42,48,85,.2)'}}}
+    }
+  });
+}
+
+// Simulation chart
+new Chart(document.getElementById('simChart'),{
+  type:'bar',
+  data:{
+    labels:['現状維持','改善① 北島35名','改善② 北島¥30k','目標達成'],
+    datasets:[
+      {label:'藍住校',data:[37*39118*12,37*39118*12,37*39118*12,40*39000*12],backgroundColor:'rgba(79,140,255,.6)',borderRadius:6,barPercentage:.5},
+      {label:'北島校',data:[31*27543*12,35*27543*12,35*30000*12,35*30000*12],backgroundColor:'rgba(34,197,94,.6)',borderRadius:6,barPercentage:.5}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#8b92b0'}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmt(ctx.parsed.y)+' (年間)'}}},
+    scales:{
+      x:{stacked:true,grid:{display:false}},
+      y:{stacked:true,grid:{color:'rgba(42,48,85,.4)'},ticks:{callback:v=>'¥'+(v/10000).toFixed(0)+'万'}}
+    }
+  }
+});
+
+// Initial render
+updateAll();
+updateOverlay();
+</script>
+</body>
+</html>

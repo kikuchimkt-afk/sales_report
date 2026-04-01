@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ベストワン北島中央校 売上分析レポート 2013-2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0f1117;
+  --bg-secondary: #1a1d2e;
+  --bg-card: #1e2235;
+  --bg-card-hover: #252a42;
+  --border: #2a2f4a;
+  --text-primary: #e8eaf0;
+  --text-secondary: #8b8fa8;
+  --text-muted: #5c6080;
+  --accent-blue: #4f8cff;
+  --accent-purple: #a855f7;
+  --accent-green: #22c55e;
+  --accent-orange: #f59e0b;
+  --accent-red: #ef4444;
+  --accent-cyan: #06b6d4;
+  --accent-pink: #ec4899;
+  --gradient-blue: linear-gradient(135deg, #4f8cff 0%, #3b82f6 100%);
+  --gradient-purple: linear-gradient(135deg, #a855f7 0%, #8b5cf6 100%);
+  --gradient-green: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.7; min-height: 100vh; }
+.container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.hero { background: linear-gradient(135deg, #1a1d2e 0%, #0f1117 50%, #1a2510 100%); border-bottom: 1px solid var(--border); padding: 48px 0 40px; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(34,197,94,0.08) 0%, transparent 70%); pointer-events: none; }
+.hero h1 { font-size: 2rem; font-weight: 700; letter-spacing: 0.02em; background: linear-gradient(135deg, #e8eaf0, #a8c8a0); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.hero .subtitle { color: var(--text-secondary); font-size: 0.95rem; margin-top: 8px; }
+.hero .date { color: var(--text-muted); font-size: 0.8rem; margin-top: 12px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 32px 0; }
+.kpi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; position: relative; overflow: hidden; transition: transform 0.2s, border-color 0.2s; }
+.kpi-card:hover { transform: translateY(-2px); border-color: var(--accent-green); }
+.kpi-card .kpi-label { font-size: 0.78rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+.kpi-card .kpi-value { font-size: 1.7rem; font-weight: 700; margin: 6px 0 4px; }
+.kpi-card .kpi-sub { font-size: 0.78rem; color: var(--text-muted); }
+.kpi-card .kpi-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; }
+.badge-up { background: rgba(34,197,94,0.15); color: var(--accent-green); }
+.badge-down { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+.kpi-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.kpi-card:nth-child(1)::after { background: var(--gradient-green); }
+.kpi-card:nth-child(2)::after { background: var(--gradient-blue); }
+.kpi-card:nth-child(3)::after { background: var(--gradient-purple); }
+.kpi-card:nth-child(4)::after { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.section { margin: 40px 0; }
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.section-header .icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.section-header h2 { font-size: 1.25rem; font-weight: 600; }
+.section-header .tag { font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; background: rgba(34,197,94,0.12); color: var(--accent-green); font-weight: 500; }
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow); }
+.card-title { font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.chart-container { position: relative; height: 340px; width: 100%; }
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.data-table th { background: rgba(34,197,94,0.08); padding: 10px 14px; text-align: right; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border); white-space: nowrap; }
+.data-table th:first-child { text-align: left; border-radius: 8px 0 0 0; }
+.data-table th:last-child { border-radius: 0 8px 0 0; }
+.data-table td { padding: 9px 14px; text-align: right; border-bottom: 1px solid rgba(42,47,74,0.5); white-space: nowrap; }
+.data-table td:first-child { text-align: left; font-weight: 500; color: var(--text-primary); }
+.data-table tr:hover td { background: rgba(34,197,94,0.04); }
+.data-table .year-total td { font-weight: 700; background: rgba(34,197,94,0.06); border-top: 2px solid var(--accent-green); }
+.data-table .csv-note { color: var(--accent-orange); font-size: 0.7rem; }
+.text-green { color: var(--accent-green); font-weight: 600; }
+.text-red { color: var(--accent-red); font-weight: 600; }
+.text-blue { color: var(--accent-blue); }
+.text-orange { color: var(--accent-orange); }
+.text-purple { color: var(--accent-purple); font-weight: 600; }
+.insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.insight-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; border-left: 3px solid; }
+.insight-box.positive { border-left-color: var(--accent-green); }
+.insight-box.negative { border-left-color: var(--accent-red); }
+.insight-box.info { border-left-color: var(--accent-blue); }
+.insight-box.warning { border-left-color: var(--accent-orange); }
+.insight-box h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; }
+.insight-box p { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6; }
+.insight-box .highlight { font-weight: 700; color: var(--text-primary); }
+footer { border-top: 1px solid var(--border); padding: 24px 0; margin-top: 60px; text-align: center; color: var(--text-muted); font-size: 0.75rem; }
+@media (max-width: 768px) {
+  .chart-row, .insight-grid { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero h1 { font-size: 1.5rem; }
+  .data-table { font-size: 0.75rem; }
+  .data-table th, .data-table td { padding: 7px 8px; }
+}
+@media print {
+  body { background: #fff; color: #222; }
+  .card, .kpi-card, .insight-box { background: #fff; border: 1px solid #ddd; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .hero { background: #f8f9fa; }
+  .hero h1 { -webkit-text-fill-color: #222; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="container">
+    <h1>ベストワン北島中央校 売上分析レポート</h1>
+    <p class="subtitle">2012年度（開校）〜2026年度（4月）｜月次売上・生徒数・生徒単価の推移分析</p>
+    <p class="date">作成日: 2026年4月2日 ｜ データソース: CSV塾マネ出力 + Excel確定値</p>
+  </div>
+</header>
+
+<main class="container">
+
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-label">2026年4月 授業料＋諸費</div>
+    <div class="kpi-value" style="color:var(--accent-green)">¥853,860</div>
+    <div class="kpi-sub"><span class="kpi-badge badge-down">▼ -2.8% 前年同月比</span></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">2026年4月 生徒数</div>
+    <div class="kpi-value" style="color:var(--accent-blue)">31名</div>
+    <div class="kpi-sub">前年同月 34名（-3名）</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">2026年4月 生徒単価</div>
+    <div class="kpi-value" style="color:var(--accent-purple)">¥27,543</div>
+    <div class="kpi-sub">開校時 ¥22,000 → 現在</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">ピーク生徒数</div>
+    <div class="kpi-value" style="color:var(--accent-orange)">51名</div>
+    <div class="kpi-sub">2021/08 | 現在31名</div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(34,197,94,0.12);color:var(--accent-green)">📊</div>
+    <h2>月次売上推移</h2>
+    <span class="tag">授業料＋諸費</span>
+  </div>
+  <div class="card">
+    <div class="chart-container">
+      <canvas id="salesChart"></canvas>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(79,140,255,0.12);color:var(--accent-blue)">👥</div>
+    <h2>生徒数・生徒単価の推移</h2>
+  </div>
+  <div class="chart-row">
+    <div class="card">
+      <div class="card-title">📈 生徒数推移</div>
+      <div class="chart-container">
+        <canvas id="studentsChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">💰 生徒単価推移</div>
+      <div class="chart-container">
+        <canvas id="unitPriceChart"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(168,85,247,0.12);color:var(--accent-purple)">📋</div>
+    <h2>年度別サマリー</h2>
+  </div>
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>年度</th><th>月数</th><th>月平均生徒数</th><th>年間授業料＋諸費</th><th>入学金</th><th>月平均売上</th><th>平均生徒単価</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>2012年度(3ヶ月)</td><td>3</td><td>5.7</td><td>¥374,280</td><td>¥0</td><td>¥124,760</td><td>¥22,016</td></tr>
+        <tr><td>2013年度</td><td>12</td><td>19.1</td><td>¥5,762,975</td><td>¥10,800</td><td>¥480,247</td><td>¥25,165</td></tr>
+        <tr><td>2014年度</td><td>12</td><td>34.5</td><td>¥11,694,132</td><td>¥59,400</td><td>¥974,511</td><td>¥28,246</td></tr>
+        <tr><td>2015年度</td><td>12</td><td>26.5</td><td>¥8,262,765</td><td>¥21,600</td><td>¥688,563</td><td>¥25,983</td></tr>
+        <tr><td>2016年度</td><td>12</td><td>27.0</td><td>¥8,407,530</td><td>¥75,600</td><td>¥700,627</td><td>¥25,949</td></tr>
+        <tr><td>2017年度</td><td>12</td><td>25.1</td><td>¥8,207,904</td><td>¥54,000</td><td>¥683,992</td><td>¥27,268</td></tr>
+        <tr><td>2018年度</td><td>12</td><td>31.6</td><td>¥10,148,763</td><td>¥64,800</td><td>¥845,730</td><td>¥26,777</td></tr>
+        <tr><td>2019年度</td><td>12</td><td>40.4</td><td>¥13,140,302</td><td>¥27,000</td><td>¥1,095,025</td><td>¥27,093</td></tr>
+        <tr><td>2020年度</td><td>12</td><td>41.7</td><td>¥14,498,900</td><td>¥22,000</td><td>¥1,208,241</td><td>¥28,997</td></tr>
+        <tr><td>2021年度</td><td>12</td><td>47.0</td><td>¥15,895,900</td><td>¥93,500</td><td>¥1,324,658</td><td>¥28,184</td></tr>
+        <tr><td>2022年度</td><td>12</td><td>43.0</td><td>¥13,778,410</td><td>¥11,000</td><td>¥1,148,200</td><td>¥26,702</td></tr>
+        <tr><td>2023年度</td><td>12</td><td>39.8</td><td>¥13,889,550</td><td>¥44,000</td><td>¥1,157,462</td><td>¥29,057</td></tr>
+        <tr><td>2024年度</td><td>12</td><td>34.2</td><td>¥11,500,950</td><td>¥46,680</td><td>¥958,412</td><td>¥28,051</td></tr>
+        <tr><td>2025年度</td><td>12</td><td>35.7</td><td>¥11,004,400</td><td>¥16,500</td><td>¥917,033</td><td>¥25,711</td></tr>
+        <tr class="year-total"><td>2026年度(1ヶ月)</td><td>1</td><td>31.0</td><td>¥853,860</td><td>¥0</td><td>¥853,860</td><td>¥27,543</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(245,158,11,0.12);color:var(--accent-orange)">🔄</div>
+    <h2>前年同月比</h2>
+  </div>
+  <div class="card">
+    <div class="card-title">2024年度 vs 2025年度</div>
+    <div class="chart-container" style="height:300px">
+      <canvas id="yoyChart"></canvas>
+    </div>
+  </div>
+  <div class="card" style="overflow-x:auto">
+    <div class="card-title">2024年度 → 2025年度 詳細</div>
+    <table class="data-table">
+      <thead>
+        <tr><th>月</th><th>2024年度</th><th>2025年度</th><th>差額</th><th>前年比</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>4月</td><td>¥875,000</td><td>¥878,770</td><td class="text-green">+¥3,770</td><td class="text-green">100.4%</td></tr>
+        <tr><td>5月</td><td>¥909,950</td><td>¥937,880</td><td class="text-green">+¥27,930</td><td class="text-green">103.1%</td></tr>
+        <tr><td>6月</td><td>¥896,000</td><td>¥975,610</td><td class="text-green">+¥79,610</td><td class="text-green">108.9%</td></tr>
+        <tr><td>7月</td><td>¥924,000</td><td>¥953,500</td><td class="text-green">+¥29,500</td><td class="text-green">103.2%</td></tr>
+        <tr><td>8月</td><td>¥952,000</td><td>¥931,390</td><td class="text-red">-¥20,610</td><td class="text-red">97.8%</td></tr>
+        <tr><td>9月</td><td>¥1,036,000</td><td>¥936,050</td><td class="text-red">-¥99,950</td><td class="text-red">90.4%</td></tr>
+        <tr><td>10月</td><td>¥1,008,000</td><td>¥875,250</td><td class="text-red">-¥132,750</td><td class="text-red">86.8%</td></tr>
+        <tr><td>11月</td><td>¥1,036,000</td><td>¥875,250</td><td class="text-red">-¥160,750</td><td class="text-red">84.5%</td></tr>
+        <tr><td>12月</td><td>¥1,036,000</td><td>¥891,830</td><td class="text-red">-¥144,170</td><td class="text-red">86.1%</td></tr>
+        <tr><td>1月</td><td>¥1,036,000</td><td>¥966,790</td><td class="text-red">-¥69,210</td><td class="text-red">93.3%</td></tr>
+        <tr><td>2月</td><td>¥952,000</td><td>¥911,290</td><td class="text-red">-¥40,710</td><td class="text-red">95.7%</td></tr>
+        <tr><td>3月</td><td>¥840,000</td><td>¥870,790</td><td class="text-green">+¥30,790</td><td class="text-green">103.7%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(168,85,247,0.12);color:var(--accent-purple)">💰</div>
+    <h2>生徒単価の推移（年度別）</h2>
+  </div>
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr><th>年度</th><th>平均生徒単価</th><th>前年比</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2012年度</td><td>¥22,016</td><td>—</td></tr>
+        <tr><td>2013年度</td><td>¥25,165</td><td>+14.3%</td></tr>
+        <tr><td>2014年度</td><td>¥28,246</td><td>+12.2%</td></tr>
+        <tr><td>2015年度</td><td>¥25,983</td><td>-8.0%</td></tr>
+        <tr><td>2016年度</td><td>¥25,949</td><td>-0.1%</td></tr>
+        <tr><td>2017年度</td><td>¥27,268</td><td>+5.1%</td></tr>
+        <tr><td>2018年度</td><td>¥26,777</td><td>-1.8%</td></tr>
+        <tr><td>2019年度</td><td>¥27,093</td><td>+1.2%</td></tr>
+        <tr><td>2020年度</td><td>¥28,997</td><td>+7.0%</td></tr>
+        <tr><td>2021年度</td><td>¥28,184</td><td>-2.8%</td></tr>
+        <tr><td>2022年度</td><td>¥26,702</td><td>-5.3%</td></tr>
+        <tr><td>2023年度</td><td>¥29,057</td><td>+8.8%</td></tr>
+        <tr><td>2024年度</td><td>¥28,051</td><td>-3.5%</td></tr>
+        <tr><td>2025年度</td><td>¥25,711</td><td>-8.3%</td></tr>
+        <tr class="year-total"><td>2026年度</td><td>¥27,543</td><td>+7.1%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(6,182,212,0.12);color:var(--accent-cyan)">💡</div>
+    <h2>主要な気づき</h2>
+  </div>
+  <div class="insight-grid">
+    <div class="insight-box info">
+      <h4>📈 安定した生徒単価</h4>
+      <p>¥22,000（2012年度）→ <span class="highlight">¥27,543</span>（2026/04）。13年間で+25%。藍住校に比べて安定的に推移。</p>
+    </div>
+    <div class="insight-box positive">
+      <h4>🏫 長期安定校</h4>
+      <p>2013年1月開校以来<span class="highlight">13年</span>の運営実績。年間売上は¥800万〜¥1,600万の範囲で安定推移。</p>
+    </div>
+    <div class="insight-box negative">
+      <h4>⚠️ 生徒数の減少傾向</h4>
+      <p><span class="highlight">51名</span>（2021/08ピーク）→ <span class="highlight">31名</span>（2026/04）。ピークから約40%減。</p>
+    </div>
+    <div class="insight-box warning">
+      <h4>📉 売上縮小トレンド</h4>
+      <p>年間売上ピーク: <span class="highlight">¥15,895,900</span>（2021年度）→ 2025年度: ¥11,004,400。4年で約31%減。</p>
+    </div>
+    <div class="insight-box info">
+      <h4>🔄 藍住校との比較</h4>
+      <p>北島校は藍住校より<span class="highlight">2年早い</span>開校。生徒数ピークは2021年の51名（藍住校は78名）。単価は藍住校の方が高い傾向。</p>
+    </div>
+    <div class="insight-box positive">
+      <h4>💰 経営安定性</h4>
+      <p>月間売上の変動幅が藍住校より小さく、<span class="highlight">安定した収益基盤</span>。生徒単価の急激な変動も少ない。</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(34,197,94,0.12);color:var(--accent-green)">📑</div>
+    <h2>月次詳細データ</h2>
+  </div>
+  <div class="card" style="overflow-x:auto">
+    <table class="data-table" id="monthlyTable">
+      <thead>
+        <tr><th>年月</th><th>生徒数</th><th>授業料＋諸費</th><th>入学金</th><th>生徒単価</th><th>備考</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>ベストワン北島中央校 ｜ 社内資料 ｜ 2026年4月2日作成</p>
+  </div>
+</footer>
+
+<script>
+const monthlyData = [
+  {ym:'2013/01',fy:2012,m:1,students:3,sales:66000,enroll:0,note:'開校'},
+  {ym:'2013/02',fy:2012,m:2,students:3,sales:66000,enroll:0,note:''},
+  {ym:'2013/03',fy:2012,m:3,students:11,sales:242280,enroll:0,note:''},
+  // 2013
+  {ym:'2013/04',fy:2013,m:4,students:14,sales:309120,enroll:0,note:''},
+  {ym:'2013/05',fy:2013,m:5,students:15,sales:361920,enroll:0,note:''},
+  {ym:'2013/06',fy:2013,m:6,students:15,sales:361920,enroll:0,note:''},
+  {ym:'2013/07',fy:2013,m:7,students:13,sales:336435,enroll:0,note:''},
+  {ym:'2013/08',fy:2013,m:8,students:20,sales:486300,enroll:0,note:''},
+  {ym:'2013/09',fy:2013,m:9,students:19,sales:455835,enroll:0,note:''},
+  {ym:'2013/10',fy:2013,m:10,students:18,sales:438525,enroll:0,note:''},
+  {ym:'2013/11',fy:2013,m:11,students:18,sales:438525,enroll:0,note:''},
+  {ym:'2013/12',fy:2013,m:12,students:22,sales:577065,enroll:0,note:''},
+  {ym:'2014/01',fy:2013,m:1,students:25,sales:681620,enroll:0,note:''},
+  {ym:'2014/02',fy:2013,m:2,students:23,sales:605610,enroll:0,note:''},
+  {ym:'2014/03',fy:2013,m:3,students:27,sales:710100,enroll:10800,note:''},
+  // 2014
+  {ym:'2014/04',fy:2014,m:4,students:29,sales:778740,enroll:21600,note:''},
+  {ym:'2014/05',fy:2014,m:5,students:33,sales:896364,enroll:32400,note:''},
+  {ym:'2014/06',fy:2014,m:6,students:32,sales:905784,enroll:0,note:''},
+  {ym:'2014/07',fy:2014,m:7,students:31,sales:884640,enroll:0,note:''},
+  {ym:'2014/08',fy:2014,m:8,students:37,sales:1035804,enroll:0,note:''},
+  {ym:'2014/09',fy:2014,m:9,students:35,sales:997188,enroll:0,note:''},
+  {ym:'2014/10',fy:2014,m:10,students:33,sales:959868,enroll:0,note:''},
+  {ym:'2014/11',fy:2014,m:11,students:35,sales:994812,enroll:5400,note:''},
+  {ym:'2014/12',fy:2014,m:12,students:39,sales:1173456,enroll:0,note:''},
+  {ym:'2015/01',fy:2014,m:1,students:41,sales:1194684,enroll:0,note:''},
+  {ym:'2015/02',fy:2014,m:2,students:40,sales:1172028,enroll:0,note:''},
+  {ym:'2015/03',fy:2014,m:3,students:29,sales:700764,enroll:0,note:''},
+  // 2015
+  {ym:'2015/04',fy:2015,m:4,students:29,sales:731976,enroll:0,note:''},
+  {ym:'2015/05',fy:2015,m:5,students:31,sales:771456,enroll:0,note:''},
+  {ym:'2015/06',fy:2015,m:6,students:31,sales:796944,enroll:0,note:''},
+  {ym:'2015/07',fy:2015,m:7,students:27,sales:670896,enroll:0,note:''},
+  {ym:'2015/08',fy:2015,m:8,students:31,sales:749640,enroll:0,note:''},
+  {ym:'2015/09',fy:2015,m:9,students:28,sales:686424,enroll:0,note:''},
+  {ym:'2015/10',fy:2015,m:10,students:24,sales:645696,enroll:0,note:''},
+  {ym:'2015/11',fy:2015,m:11,students:23,sales:640212,enroll:0,note:''},
+  {ym:'2015/12',fy:2015,m:12,students:23,sales:640212,enroll:0,note:''},
+  {ym:'2016/01',fy:2015,m:1,students:23,sales:640212,enroll:0,note:''},
+  {ym:'2016/02',fy:2015,m:2,students:24,sales:682578,enroll:0,note:''},
+  {ym:'2016/03',fy:2015,m:3,students:24,sales:606519,enroll:21600,note:''},
+  // 2016
+  {ym:'2016/04',fy:2016,m:4,students:24,sales:606519,enroll:0,note:''},
+  {ym:'2016/05',fy:2016,m:5,students:23,sales:589695,enroll:0,note:''},
+  {ym:'2016/06',fy:2016,m:6,students:23,sales:589695,enroll:0,note:''},
+  {ym:'2016/07',fy:2016,m:7,students:23,sales:589695,enroll:0,note:''},
+  {ym:'2016/08',fy:2016,m:8,students:29,sales:740211,enroll:0,note:''},
+  {ym:'2016/09',fy:2016,m:9,students:28,sales:698331,enroll:0,note:''},
+  {ym:'2016/10',fy:2016,m:10,students:29,sales:750579,enroll:21600,note:''},
+  {ym:'2016/11',fy:2016,m:11,students:29,sales:757815,enroll:0,note:''},
+  {ym:'2016/12',fy:2016,m:12,students:33,sales:886131,enroll:10800,note:''},
+  {ym:'2017/01',fy:2016,m:1,students:31,sales:837201,enroll:0,note:''},
+  {ym:'2017/02',fy:2016,m:2,students:26,sales:732021,enroll:0,note:''},
+  {ym:'2017/03',fy:2016,m:3,students:26,sales:629637,enroll:43200,note:''},
+  // 2017
+  {ym:'2017/04',fy:2017,m:4,students:24,sales:619857,enroll:0,note:''},
+  {ym:'2017/05',fy:2017,m:5,students:24,sales:597177,enroll:10800,note:''},
+  {ym:'2017/06',fy:2017,m:6,students:24,sales:605061,enroll:0,note:''},
+  {ym:'2017/07',fy:2017,m:7,students:23,sales:587589,enroll:0,note:''},
+  {ym:'2017/08',fy:2017,m:8,students:27,sales:769581,enroll:0,note:''},
+  {ym:'2017/09',fy:2017,m:9,students:26,sales:764853,enroll:0,note:''},
+  {ym:'2017/10',fy:2017,m:10,students:25,sales:745113,enroll:0,note:''},
+  {ym:'2017/11',fy:2017,m:11,students:26,sales:762909,enroll:0,note:''},
+  {ym:'2017/12',fy:2017,m:12,students:28,sales:800013,enroll:10800,note:''},
+  {ym:'2018/01',fy:2017,m:1,students:28,sales:800013,enroll:0,note:''},
+  {ym:'2018/02',fy:2017,m:2,students:24,sales:619533,enroll:0,note:''},
+  {ym:'2018/03',fy:2017,m:3,students:22,sales:536205,enroll:32400,note:''},
+  // 2018
+  {ym:'2018/04',fy:2018,m:4,students:21,sales:513657,enroll:10800,note:''},
+  {ym:'2018/05',fy:2018,m:5,students:23,sales:557997,enroll:0,note:''},
+  {ym:'2018/06',fy:2018,m:6,students:23,sales:557997,enroll:0,note:''},
+  {ym:'2018/07',fy:2018,m:7,students:23,sales:557997,enroll:0,note:''},
+  {ym:'2018/08',fy:2018,m:8,students:37,sales:1016661,enroll:0,note:''},
+  {ym:'2018/09',fy:2018,m:9,students:37,sales:1016661,enroll:0,note:''},
+  {ym:'2018/10',fy:2018,m:10,students:35,sales:977937,enroll:0,note:''},
+  {ym:'2018/11',fy:2018,m:11,students:35,sales:1007205,enroll:10800,note:''},
+  {ym:'2018/12',fy:2018,m:12,students:39,sales:1082601,enroll:21600,note:''},
+  {ym:'2019/01',fy:2018,m:1,students:36,sales:978129,enroll:0,note:''},
+  {ym:'2019/02',fy:2018,m:2,students:33,sales:888993,enroll:0,note:''},
+  {ym:'2019/03',fy:2018,m:3,students:37,sales:992928,enroll:21600,note:''},
+  // 2019
+  {ym:'2019/04',fy:2019,m:4,students:37,sales:987204,enroll:5400,note:''},
+  {ym:'2019/05',fy:2019,m:5,students:38,sales:1031460,enroll:0,note:''},
+  {ym:'2019/06',fy:2019,m:6,students:38,sales:1045284,enroll:0,note:''},
+  {ym:'2019/07',fy:2019,m:7,students:38,sales:1045284,enroll:0,note:''},
+  {ym:'2019/08',fy:2019,m:8,students:43,sales:1113420,enroll:21600,note:''},
+  {ym:'2019/09',fy:2019,m:9,students:44,sales:1172600,enroll:0,note:''},
+  {ym:'2019/10',fy:2019,m:10,students:42,sales:1164300,enroll:0,note:'消費税10%'},
+  {ym:'2019/11',fy:2019,m:11,students:42,sales:1164300,enroll:0,note:''},
+  {ym:'2019/12',fy:2019,m:12,students:44,sales:1207910,enroll:0,note:''},
+  {ym:'2020/01',fy:2019,m:1,students:43,sales:1187150,enroll:0,note:''},
+  {ym:'2020/02',fy:2019,m:2,students:38,sales:1000300,enroll:0,note:''},
+  {ym:'2020/03',fy:2019,m:3,students:38,sales:1021090,enroll:0,note:''},
+  // 2020
+  {ym:'2020/04',fy:2020,m:4,students:36,sales:1011498,enroll:22000,note:'コロナ'},
+  {ym:'2020/05',fy:2020,m:5,students:39,sales:1142968,enroll:0,note:''},
+  {ym:'2020/06',fy:2020,m:6,students:39,sales:1109418,enroll:0,note:''},
+  {ym:'2020/07',fy:2020,m:7,students:39,sales:1109418,enroll:0,note:''},
+  {ym:'2020/08',fy:2020,m:8,students:42,sales:1204038,enroll:0,note:''},
+  {ym:'2020/09',fy:2020,m:9,students:45,sales:1295798,enroll:0,note:''},
+  {ym:'2020/10',fy:2020,m:10,students:44,sales:1278448,enroll:0,note:''},
+  {ym:'2020/11',fy:2020,m:11,students:44,sales:1278448,enroll:0,note:''},
+  {ym:'2020/12',fy:2020,m:12,students:46,sales:1424358,enroll:0,note:''},
+  {ym:'2021/01',fy:2020,m:1,students:44,sales:1296378,enroll:0,note:''},
+  {ym:'2021/02',fy:2020,m:2,students:39,sales:1092120,enroll:0,note:''},
+  {ym:'2021/03',fy:2020,m:3,students:43,sales:1256010,enroll:0,note:''},
+  // 2021
+  {ym:'2021/04',fy:2021,m:4,students:44,sales:1255870,enroll:55000,note:''},
+  {ym:'2021/05',fy:2021,m:5,students:44,sales:1276605,enroll:0,note:''},
+  {ym:'2021/06',fy:2021,m:6,students:46,sales:1352555,enroll:0,note:''},
+  {ym:'2021/07',fy:2021,m:7,students:46,sales:1333635,enroll:0,note:''},
+  {ym:'2021/08',fy:2021,m:8,students:51,sales:1428855,enroll:27500,note:''},
+  {ym:'2021/09',fy:2021,m:9,students:50,sales:1408535,enroll:0,note:''},
+  {ym:'2021/10',fy:2021,m:10,students:49,sales:1386125,enroll:0,note:''},
+  {ym:'2021/11',fy:2021,m:11,students:50,sales:1390935,enroll:0,note:''},
+  {ym:'2021/12',fy:2021,m:12,students:50,sales:1376525,enroll:0,note:''},
+  {ym:'2022/01',fy:2021,m:1,students:46,sales:1268185,enroll:0,note:''},
+  {ym:'2022/02',fy:2021,m:2,students:45,sales:1251055,enroll:0,note:''},
+  {ym:'2022/03',fy:2021,m:3,students:43,sales:1167020,enroll:11000,note:''},
+  // 2022
+  {ym:'2022/04',fy:2022,m:4,students:41,sales:1085460,enroll:0,note:''},
+  {ym:'2022/05',fy:2022,m:5,students:42,sales:1104790,enroll:0,note:''},
+  {ym:'2022/06',fy:2022,m:6,students:43,sales:1123020,enroll:0,note:''},
+  {ym:'2022/07',fy:2022,m:7,students:43,sales:1123020,enroll:0,note:''},
+  {ym:'2022/08',fy:2022,m:8,students:45,sales:1202380,enroll:0,note:''},
+  {ym:'2022/09',fy:2022,m:9,students:45,sales:1202380,enroll:0,note:''},
+  {ym:'2022/10',fy:2022,m:10,students:45,sales:1175210,enroll:11000,note:''},
+  {ym:'2022/11',fy:2022,m:11,students:44,sales:1167870,enroll:0,note:''},
+  {ym:'2022/12',fy:2022,m:12,students:47,sales:1236970,enroll:0,note:''},
+  {ym:'2023/01',fy:2022,m:1,students:44,sales:1180190,enroll:0,note:''},
+  {ym:'2023/02',fy:2022,m:2,students:39,sales:1047790,enroll:0,note:''},
+  {ym:'2023/03',fy:2022,m:3,students:38,sales:1129330,enroll:0,note:''},
+  // 2023
+  {ym:'2023/04',fy:2023,m:4,students:40,sales:1184820,enroll:0,note:''},
+  {ym:'2023/05',fy:2023,m:5,students:40,sales:1184820,enroll:0,note:''},
+  {ym:'2023/06',fy:2023,m:6,students:39,sales:1147890,enroll:0,note:''},
+  {ym:'2023/07',fy:2023,m:7,students:38,sales:1127460,enroll:0,note:''},
+  {ym:'2023/08',fy:2023,m:8,students:41,sales:1203820,enroll:22000,note:''},
+  {ym:'2023/09',fy:2023,m:9,students:41,sales:1203820,enroll:0,note:''},
+  {ym:'2023/10',fy:2023,m:10,students:41,sales:1232310,enroll:22000,note:''},
+  {ym:'2023/11',fy:2023,m:11,students:41,sales:1230550,enroll:0,note:''},
+  {ym:'2023/12',fy:2023,m:12,students:44,sales:1153460,enroll:0,note:'※推定値'},
+  {ym:'2024/01',fy:2023,m:1,students:46,sales:1208510,enroll:0,note:'※推定値'},
+  {ym:'2024/02',fy:2023,m:2,students:37,sales:1153230,enroll:0,note:'※推定値'},
+  {ym:'2024/03',fy:2023,m:3,students:30,sales:858860,enroll:0,note:'※推定値'},
+  // 2024
+  {ym:'2024/04',fy:2024,m:4,students:31,sales:875000,enroll:0,note:'※推定値'},
+  {ym:'2024/05',fy:2024,m:5,students:32,sales:909950,enroll:0,note:'※推定値'},
+  {ym:'2024/06',fy:2024,m:6,students:32,sales:896000,enroll:0,note:'※推定値'},
+  {ym:'2024/07',fy:2024,m:7,students:33,sales:924000,enroll:0,note:'※推定値'},
+  {ym:'2024/08',fy:2024,m:8,students:34,sales:952000,enroll:0,note:'※推定値'},
+  {ym:'2024/09',fy:2024,m:9,students:37,sales:1036000,enroll:11000,note:'※推定値'},
+  {ym:'2024/10',fy:2024,m:10,students:36,sales:1008000,enroll:0,note:'※推定値'},
+  {ym:'2024/11',fy:2024,m:11,students:37,sales:1036000,enroll:5500,note:'※推定値'},
+  {ym:'2024/12',fy:2024,m:12,students:37,sales:1036000,enroll:0,note:'※推定値'},
+  {ym:'2025/01',fy:2024,m:1,students:37,sales:1036000,enroll:0,note:'※推定値'},
+  {ym:'2025/02',fy:2024,m:2,students:34,sales:952000,enroll:0,note:'※推定値'},
+  {ym:'2025/03',fy:2024,m:3,students:30,sales:840000,enroll:30180,note:'※推定値'},
+  // 2025
+  {ym:'2025/04',fy:2025,m:4,students:34,sales:878770,enroll:11000,note:''},
+  {ym:'2025/05',fy:2025,m:5,students:36,sales:937880,enroll:0,note:''},
+  {ym:'2025/06',fy:2025,m:6,students:37,sales:975610,enroll:0,note:''},
+  {ym:'2025/07',fy:2025,m:7,students:36,sales:953500,enroll:0,note:''},
+  {ym:'2025/08',fy:2025,m:8,students:35,sales:931390,enroll:0,note:''},
+  {ym:'2025/09',fy:2025,m:9,students:37,sales:936050,enroll:5500,note:''},
+  {ym:'2025/10',fy:2025,m:10,students:35,sales:875250,enroll:0,note:''},
+  {ym:'2025/11',fy:2025,m:11,students:35,sales:875250,enroll:0,note:''},
+  {ym:'2025/12',fy:2025,m:12,students:35,sales:891830,enroll:0,note:''},
+  {ym:'2026/01',fy:2025,m:1,students:37,sales:966790,enroll:0,note:''},
+  {ym:'2026/02',fy:2025,m:2,students:36,sales:911290,enroll:0,note:''},
+  {ym:'2026/03',fy:2025,m:3,students:35,sales:870790,enroll:0,note:''},
+  // 2026
+  {ym:'2026/04',fy:2026,m:4,students:31,sales:853860,enroll:0,note:''},
+];
+
+const fmt = n => '¥' + n.toLocaleString();
+
+const tbody = document.querySelector('#monthlyTable tbody');
+let currentFy = null;
+monthlyData.forEach(d => {
+  if (currentFy !== null && d.fy !== currentFy) {
+    const sep = document.createElement('tr');
+    sep.innerHTML = '<td colspan="6" style="height:4px;background:var(--border);padding:0"></td>';
+    tbody.appendChild(sep);
+  }
+  currentFy = d.fy;
+  const unit = Math.round(d.sales / d.students);
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${d.ym}</td><td>${d.students}</td><td>${fmt(d.sales)}</td><td>${d.enroll ? fmt(d.enroll) : '—'}</td><td>${fmt(unit)}</td><td class="csv-note">${d.note}</td>`;
+  tbody.appendChild(tr);
+});
+
+Chart.defaults.font.family = "'Noto Sans JP', sans-serif";
+Chart.defaults.color = '#8b8fa8';
+
+const fyColors = {
+  2012: {line:'#6b7280',bg:'#6b728015'},
+  2013: {line:'#78716c',bg:'#78716c15'},
+  2014: {line:'#a1887f',bg:'#a1887f15'},
+  2015: {line:'#ef9a9a',bg:'#ef9a9a15'},
+  2016: {line:'#ce93d8',bg:'#ce93d815'},
+  2017: {line:'#90caf9',bg:'#90caf915'},
+  2018: {line:'#80cbc4',bg:'#80cbc415'},
+  2019: {line:'#94a3b8',bg:'#94a3b815'},
+  2020: {line:'#4f8cff',bg:'#4f8cff15'},
+  2021: {line:'#f59e0b',bg:'#f59e0b15'},
+  2022: {line:'#22c55e',bg:'#22c55e15'},
+  2023: {line:'#a855f7',bg:'#a855f715'},
+  2024: {line:'#ec4899',bg:'#ec489915'},
+  2025: {line:'#06b6d4',bg:'#06b6d415'},
+  2026: {line:'#6b7280',bg:'#6b728015'},
+};
+
+new Chart(document.getElementById('salesChart'), {
+  type: 'line',
+  data: {
+    labels: monthlyData.map(d => d.ym),
+    datasets: [{
+      label: '授業料＋諸費',
+      data: monthlyData.map(d => d.sales),
+      borderColor: '#22c55e',
+      backgroundColor: 'rgba(34,197,94,0.08)',
+      fill: true, tension: 0.3, pointRadius: 2, pointHoverRadius: 6, borderWidth: 2.5,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: {
+        label: ctx => fmt(ctx.parsed.y),
+        afterLabel: ctx => {
+          const d = monthlyData[ctx.dataIndex];
+          return `生徒数: ${d.students}名 ｜ 単価: ${fmt(Math.round(d.sales/d.students))}`;
+        }
+      } }
+    },
+    scales: {
+      y: { grid: { color: 'rgba(42,47,74,0.4)' }, ticks: { callback: v => '¥' + (v/10000).toFixed(0) + '万' } },
+      x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 }, maxTicksLimit: 30 } }
+    }
+  }
+});
+
+new Chart(document.getElementById('studentsChart'), {
+  type: 'bar',
+  data: {
+    labels: monthlyData.map(d => d.ym),
+    datasets: [{ label: '生徒数', data: monthlyData.map(d => d.students),
+      backgroundColor: monthlyData.map(d => { const c = fyColors[d.fy] || fyColors[2012]; return c.line + '99'; }),
+      borderRadius: 3, barPercentage: 0.7, }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { grid: { color: 'rgba(42,47,74,0.4)' }, beginAtZero: true },
+      x: { grid: { display: false }, ticks: { maxRotation: 90, font: { size: 7 }, maxTicksLimit: 40 } }
+    }
+  }
+});
+
+new Chart(document.getElementById('unitPriceChart'), {
+  type: 'line',
+  data: {
+    labels: monthlyData.map(d => d.ym),
+    datasets: [{ label: '生徒単価', data: monthlyData.map(d => Math.round(d.sales / d.students)),
+      borderColor: '#a855f7', backgroundColor: 'rgba(168,85,247,0.08)',
+      fill: true, tension: 0.3, pointRadius: 2, pointHoverRadius: 6, borderWidth: 2, }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: ctx => fmt(ctx.parsed.y) } } },
+    scales: {
+      y: { grid: { color: 'rgba(42,47,74,0.4)' }, ticks: { callback: v => '¥' + (v/1000).toFixed(0) + 'k' } },
+      x: { grid: { display: false }, ticks: { maxRotation: 90, font: { size: 7 }, maxTicksLimit: 30 } }
+    }
+  }
+});
+
+// YoY Chart
+const months = ['4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'];
+const fy2024 = [4,5,6,7,8,9,10,11,12,1,2,3].map(m => {
+  const d = monthlyData.find(x => x.fy === 2024 && x.m === m);
+  return d ? d.sales : null;
+});
+const fy2025 = [4,5,6,7,8,9,10,11,12,1,2,3].map(m => {
+  const d = monthlyData.find(x => x.fy === 2025 && x.m === m);
+  return d ? d.sales : null;
+});
+new Chart(document.getElementById('yoyChart'), {
+  type: 'bar',
+  data: {
+    labels: months,
+    datasets: [
+      { label: '2024年度', data: fy2024, backgroundColor: '#f59e0b99', borderRadius: 4, barPercentage: 0.4 },
+      { label: '2025年度', data: fy2025, backgroundColor: '#22c55e99', borderRadius: 4, barPercentage: 0.4 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#8b8fa8' } },
+      tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt(ctx.parsed.y) } } },
+    scales: {
+      y: { grid: { color: 'rgba(42,47,74,0.4)' }, ticks: { callback: v => '¥' + (v/10000).toFixed(0) + '万' }, beginAtZero: true },
+      x: { grid: { display: false } }
+    }
+  }
+});
+</script>
+</body>
+</html>
