@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ベストワン藍住校 学年別生徒構成分析 ｜ 2023〜2026</title>
+<meta name="description" content="ベストワン藍住校の学年別生徒構成の推移分析。小中高の比率推移、学年別人数、卒業・進級の影響を可視化。">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0c14;--bg2:#111827;--card:#1a1f35;--card2:#1e2540;--border:#2a3055;
+  --t1:#e8eaf0;--t2:#8b92b0;--t3:#5b6280;
+  --el:#f59e0b;--el-bg:rgba(245,158,11,.12);
+  --jh:#4f8cff;--jh-bg:rgba(79,140,255,.12);
+  --hs:#22c55e;--hs-bg:rgba(34,197,94,.12);
+  --purple:#a855f7;--orange:#f59e0b;--red:#ef4444;--cyan:#06b6d4;--pink:#ec4899;
+}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--t1);line-height:1.7}
+.container{max-width:1360px;margin:0 auto;padding:0 28px}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0d1020 0%,#0a0c14 40%,#151020 100%);padding:44px 0 36px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-120px;right:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(168,85,247,.07) 0%,transparent 65%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-120px;left:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(79,140,255,.05) 0%,transparent 65%);pointer-events:none}
+.hero h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#e8eaf0,#b8a8e8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:.02em}
+.hero .sub{color:var(--t2);font-size:.92rem;margin-top:6px}
+.hero .date{color:var(--t3);font-size:.78rem;margin-top:10px}
+.nav-links{display:flex;gap:12px;margin-top:16px}
+.nav-link{padding:6px 16px;border-radius:20px;font-size:.78rem;font-weight:600;text-decoration:none;transition:all .2s}
+.nav-link.back{background:rgba(79,140,255,.1);color:var(--jh);border:1px solid rgba(79,140,255,.2)}
+.nav-link.back:hover{background:rgba(79,140,255,.2);transform:translateY(-1px)}
+
+/* SECTIONS */
+.section{margin:32px 0}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.section-header .icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.section-header h2{font-size:1.2rem;font-weight:700}
+.section-header .tag{font-size:.7rem;padding:3px 10px;border-radius:20px;font-weight:500}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;box-shadow:0 4px 24px rgba(0,0,0,.25);transition:border-color .2s}
+.card:hover{border-color:rgba(168,85,247,.2)}
+.card-title{font-size:.88rem;font-weight:600;color:var(--t2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.chart-box{position:relative;height:340px;width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:28px 0}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 22px;position:relative;overflow:hidden;transition:all .2s}
+.kpi:hover{transform:translateY(-2px);border-color:var(--purple)}
+.kpi .label{font-size:.72rem;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.kpi .val{font-size:1.4rem;font-weight:700;margin:4px 0 2px}
+.kpi .sub{font-size:.72rem;color:var(--t3)}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi:nth-child(1)::after{background:linear-gradient(90deg,#a855f7,#8b5cf6)}
+.kpi:nth-child(2)::after{background:linear-gradient(90deg,var(--el),#d97706)}
+.kpi:nth-child(3)::after{background:linear-gradient(90deg,var(--jh),#3b82f6)}
+.kpi:nth-child(4)::after{background:linear-gradient(90deg,var(--hs),#16a34a)}
+.kpi:nth-child(5)::after{background:linear-gradient(90deg,var(--cyan),#0891b2)}
+.kpi:nth-child(6)::after{background:linear-gradient(90deg,var(--pink),#db2777)}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:.8rem}
+.tbl th{background:rgba(168,85,247,.06);padding:10px 12px;text-align:right;font-weight:600;color:var(--t2);border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl th:first-child{text-align:left;border-radius:8px 0 0 0}
+.tbl th:last-child{border-radius:0 8px 0 0}
+.tbl td{padding:9px 12px;text-align:right;border-bottom:1px solid rgba(42,48,85,.5);white-space:nowrap}
+.tbl td:first-child{text-align:left;font-weight:500;color:var(--t1)}
+.tbl tr:hover td{background:rgba(168,85,247,.03)}
+.tbl .highlight-row td{background:rgba(168,85,247,.06);font-weight:600}
+
+/* BADGE */
+.grade-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:.7rem;font-weight:600;margin-right:4px}
+.grade-el{background:var(--el-bg);color:var(--el)}
+.grade-jh{background:var(--jh-bg);color:var(--jh)}
+.grade-hs{background:var(--hs-bg);color:var(--hs)}
+.up{color:var(--hs)!important}.down{color:var(--red)!important}
+
+/* INSIGHTS */
+.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.insight{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;border-left:4px solid;transition:all .2s}
+.insight:hover{transform:translateY(-2px)}
+.insight.warn{border-left-color:var(--orange)}
+.insight.danger{border-left-color:var(--red)}
+.insight.good{border-left-color:var(--hs)}
+.insight.info{border-left-color:var(--jh)}
+.insight.strategy{border-left-color:var(--purple)}
+.insight.neutral{border-left-color:var(--cyan)}
+.insight h4{font-size:.88rem;font-weight:700;margin-bottom:8px}
+.insight p{font-size:.8rem;color:var(--t2);line-height:1.7}
+.insight .hl{font-weight:700;color:var(--t1)}
+.insight .num{font-weight:800;font-size:.92rem}
+.insight ul{margin:8px 0 0 18px;font-size:.78rem;color:var(--t2)}
+.insight li{margin:4px 0;line-height:1.5}
+
+/* TAB */
+.tab-row{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tab-pill{padding:6px 14px;border-radius:20px;font-size:.76rem;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--t2);transition:all .2s;font-family:inherit}
+.tab-pill.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+.tab-pill:hover:not(.active){border-color:var(--purple);color:var(--purple)}
+
+footer{border-top:1px solid var(--border);padding:24px 0;margin-top:56px;text-align:center;color:var(--t3);font-size:.72rem}
+
+@media(max-width:900px){
+  .grid2,.grid3,.insight-grid{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .hero h1{font-size:1.5rem}
+  .tbl{font-size:.72rem}
+  .tbl th,.tbl td{padding:7px 8px}
+}
+@media print{
+  body{background:#fff;color:#222}
+  .card,.kpi,.insight{background:#fff;border:1px solid #ddd;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .hero{background:#f0f4f8}.hero h1{-webkit-text-fill-color:#222}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+<div class="container">
+  <h1>🎓 学年別生徒構成分析</h1>
+  <p class="sub">ベストワン藍住校 ｜ 小中高の学年構成推移と評価</p>
+  <p class="date">データ期間: 2023年6月〜2026年4月 ｜ 作成日: 2026年4月2日</p>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link back">← ダッシュボードに戻る</a>
+    <a href="aizumi.html" class="nav-link back">📊 藍住校 売上レポート</a>
+  </div>
+</div>
+</header>
+
+<main class="container">
+
+<!-- KPIs -->
+<div class="kpi-grid" id="kpiGrid"></div>
+
+<!-- Composition Stacked Area Chart -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(168,85,247,.12);color:var(--purple)">📊</div>
+    <h2>学年構成推移（積み上げエリア）</h2>
+    <span class="tag" style="background:rgba(168,85,247,.12);color:var(--purple)">月次</span>
+  </div>
+  <div class="card">
+    <div class="card-title">📈 学年別生徒数の推移</div>
+    <div class="tab-row" id="areaTabRow"></div>
+    <div class="chart-box" style="height:380px"><canvas id="areaChart"></canvas></div>
+  </div>
+</section>
+
+<!-- School Level Ratio -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(79,140,255,.12);color:var(--jh)">🏫</div>
+    <h2>校種別（小・中・高）構成比推移</h2>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">📊 校種別人数推移</div>
+      <div class="chart-box"><canvas id="levelChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 校種別構成比推移（%）</div>
+      <div class="chart-box"><canvas id="levelPctChart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- April Snapshot Comparison -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(245,158,11,.12);color:var(--orange)">🔄</div>
+    <h2>年度初（4月）の構成比較</h2>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 各年度4月の学年別人数</div>
+    <div class="chart-box" style="height:320px"><canvas id="aprilChart"></canvas></div>
+  </div>
+  <div class="card" style="overflow-x:auto">
+    <div class="card-title">📋 4月の学年別構成詳細</div>
+    <table class="tbl" id="aprilTable">
+      <thead><tr id="aprilHead"></tr></thead>
+      <tbody id="aprilBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Year-over-year grade detail -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(6,182,212,.12);color:var(--cyan)">📋</div>
+    <h2>月次学年別詳細データ</h2>
+  </div>
+  <div class="card" style="overflow-x:auto">
+    <div class="tab-row" id="detailTabRow"></div>
+    <table class="tbl" id="detailTable">
+      <thead><tr id="detailHead"></tr></thead>
+      <tbody id="detailBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Insights -->
+<section class="section">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(236,72,153,.12);color:var(--pink)">💡</div>
+    <h2>評価・分析コメント</h2>
+  </div>
+  <div class="insight-grid" id="insightGrid"></div>
+</section>
+
+</main>
+
+<footer>
+<div class="container">
+  <p>ベストワン藍住校 ｜ 学年別生徒構成分析 ｜ 社内資料 ｜ 2026年4月2日作成</p>
+</div>
+</footer>
+
+<script>
+// === GRADE COMPOSITION DATA ===
+const gradeData = {
+  "202306":{year:2023,month:6,fy:2023,grades:{中3:14,中1:5,高3:8,高2:13,中2:9,高1:8,小2:1,小6:3,小5:3,小4:1},total:65},
+  "202307":{year:2023,month:7,fy:2023,grades:{中1:5,高3:8,高2:14,中2:9,高1:9,小2:1,中3:13,小6:3,小5:3,小4:1},total:66},
+  "202308":{year:2023,month:8,fy:2023,grades:{中3:14,中1:6,高3:8,高2:13,中2:9,高1:9,小2:1,小6:3,小5:3,小4:1},total:67},
+  "202309":{year:2023,month:9,fy:2023,grades:{中3:14,中1:6,高3:10,高2:13,中2:10,高1:9,小2:1,小6:3,小5:3,小4:1},total:70},
+  "202310":{year:2023,month:10,fy:2023,grades:{中3:15,中1:6,高3:10,高2:13,中2:10,高1:9,小2:1,小6:3,小5:3,小4:1},total:71},
+  "202311":{year:2023,month:11,fy:2023,grades:{中3:15,中1:6,高3:10,高2:13,中2:10,高1:9,小2:1,小6:3,小5:3,小4:1},total:71},
+  "202312":{year:2023,month:12,fy:2023,grades:{高3:10,高2:12,高1:9,中3:17,中2:9,中1:6,小5:2,小4:1,小6:4,小2:1},total:71},
+  "202401":{year:2024,month:1,fy:2023,grades:{高2:12,高1:9,高3:6,中3:16,中2:9,中1:5,小5:2,小4:1,小6:4,小2:1},total:65},
+  "202402":{year:2024,month:2,fy:2023,grades:{高2:12,高1:9,中3:12,中2:9,中1:4,小5:2,小4:1,小6:4,小2:1},total:54},
+  "202403":{year:2024,month:3,fy:2023,grades:{高2:13,高1:9,中3:10,中2:9,中1:4,小5:3,小4:1,小6:6,小2:1},total:56},
+  "202404":{year:2024,month:4,fy:2024,grades:{高3:13,中3:9,高2:9,小3:1,高1:10,中2:4,中1:6,小6:3,小5:1},total:56},
+  "202405":{year:2024,month:5,fy:2024,grades:{高3:14,中3:10,高2:9,小3:1,高1:10,中2:4,中1:6,小6:3,小5:1},total:58},
+  "202406":{year:2024,month:6,fy:2024,grades:{高3:14,中3:11,高2:9,小3:1,高1:10,中2:4,中1:6,小6:3,小5:1},total:59},
+  "202407":{year:2024,month:7,fy:2024,grades:{高3:14,中3:11,高2:9,高1:10,中2:4,中1:6,小6:3,小5:1},total:58},
+  "202408":{year:2024,month:8,fy:2024,grades:{高3:12,中3:9,高2:9,高1:9,中2:4,小6:3,中1:5,小5:1},total:52},
+  "202409":{year:2024,month:9,fy:2024,grades:{高3:11,中3:9,高2:9,高1:9,中2:4,小6:3,中1:5,小5:2},total:52},
+  "202410":{year:2024,month:10,fy:2024,grades:{高3:11,中3:9,高2:9,高1:9,中2:4,小6:3,中1:5,小5:2},total:52},
+  "202411":{year:2024,month:11,fy:2024,grades:{高3:11,中3:9,高2:9,高1:9,中2:4,小6:3,中1:6,小5:2},total:53},
+  "202412":{year:2024,month:12,fy:2024,grades:{高3:11,中3:9,高2:8,中1:6,高1:9,中2:4,小6:3,小5:2},total:52},
+  "202501":{year:2025,month:1,fy:2024,grades:{高3:10,中3:10,高2:8,中1:6,高1:9,中2:4,小6:3,小5:2},total:52},
+  "202502":{year:2025,month:2,fy:2024,grades:{高3:8,中3:8,高2:8,中1:6,高1:9,中2:4,小6:3,小5:2},total:48},
+  "202503":{year:2025,month:3,fy:2024,grades:{中3:7,高2:8,高3:2,中1:5,高1:9,中2:5,小6:3,小5:2},total:41},
+  "202504":{year:2025,month:4,fy:2025,grades:{高1:4,高3:8,中2:6,中1:4,高2:9,中3:6,小6:2},total:39},
+  "202505":{year:2025,month:5,fy:2025,grades:{小6:2,高1:4,高3:8,中2:5,中1:3,高2:12,中3:7},total:41},
+  "202506":{year:2025,month:6,fy:2025,grades:{高1:4,高3:9,中2:5,中1:3,中3:7,高2:12,小6:2},total:42},
+  "202507":{year:2025,month:7,fy:2025,grades:{小6:2,高1:4,高3:9,中2:5,中1:3,中3:7,高2:12},total:42},
+  "202508":{year:2025,month:8,fy:2025,grades:{小6:2,高1:4,高3:9,中2:5,中1:3,中3:7,高2:12},total:42},
+  "202509":{year:2025,month:9,fy:2025,grades:{小6:2,高1:4,高3:10,中2:6,中1:3,中3:7,高2:13},total:45},
+  "202510":{year:2025,month:10,fy:2025,grades:{小6:2,高1:4,高3:10,中2:7,中1:3,中3:8,高2:13},total:47},
+  "202511":{year:2025,month:11,fy:2025,grades:{中3:9,小6:2,高1:4,高3:10,中2:7,中1:3,高2:13},total:48},
+  "202512":{year:2025,month:12,fy:2025,grades:{中3:9,小6:2,高1:4,高3:9,中2:7,中1:4,高2:13},total:48},
+  "202601":{year:2026,month:1,fy:2025,grades:{中3:9,小6:3,高1:4,高3:8,中2:7,中1:4,高2:13},total:48},
+  "202602":{year:2026,month:2,fy:2025,grades:{中3:9,小6:3,高1:4,高3:7,中2:7,中1:4,高2:13},total:47},
+  "202603":{year:2026,month:3,fy:2025,grades:{中3:5,小6:3,高1:4,高3:6,中2:6,中1:4,高2:13},total:41},
+  "202604":{year:2026,month:4,fy:2026,grades:{中1:7,高2:3,中3:6,中2:3,高3:14,高1:3,小5:1},total:37}
+};
+
+// Constants
+const allGrades = ['小1','小2','小3','小4','小5','小6','中1','中2','中3','高1','高2','高3'];
+const gradeColors = {
+  小1:'#fde68a',小2:'#fcd34d',小3:'#fbbf24',小4:'#f59e0b',小5:'#d97706',小6:'#b45309',
+  中1:'#93c5fd',中2:'#60a5fa',中3:'#3b82f6',
+  高1:'#86efac',高2:'#4ade80',高3:'#22c55e'
+};
+const levelColors = {el:'#f59e0b',jh:'#4f8cff',hs:'#22c55e'};
+
+Chart.defaults.font.family="'Noto Sans JP',sans-serif";
+Chart.defaults.color='#8b92b0';
+
+const sortedYMs = Object.keys(gradeData).sort();
+const labels = sortedYMs.map(ym => {
+  const d = gradeData[ym];
+  return `${d.year}/${String(d.month).padStart(2,'0')}`;
+});
+
+function getGradeVal(ym, grade) {
+  return gradeData[ym]?.grades?.[grade] || 0;
+}
+function getLevelCount(ym, level) {
+  const g = gradeData[ym]?.grades || {};
+  if (level === 'el') return (g['小1']||0)+(g['小2']||0)+(g['小3']||0)+(g['小4']||0)+(g['小5']||0)+(g['小6']||0);
+  if (level === 'jh') return (g['中1']||0)+(g['中2']||0)+(g['中3']||0);
+  if (level === 'hs') return (g['高1']||0)+(g['高2']||0)+(g['高3']||0);
+  return 0;
+}
+
+// ========== KPIs ==========
+const latest = gradeData[sortedYMs[sortedYMs.length-1]];
+const latestEl = getLevelCount(sortedYMs[sortedYMs.length-1],'el');
+const latestJh = getLevelCount(sortedYMs[sortedYMs.length-1],'jh');
+const latestHs = getLevelCount(sortedYMs[sortedYMs.length-1],'hs');
+const elPct = (latestEl/latest.total*100).toFixed(0);
+const jhPct = (latestJh/latest.total*100).toFixed(0);
+const hsPct = (latestHs/latest.total*100).toFixed(0);
+
+// Find max grade
+const latestGrades = Object.entries(latest.grades).sort((a,b)=>b[1]-a[1]);
+const topGrade = latestGrades[0];
+
+document.getElementById('kpiGrid').innerHTML = `
+  <div class="kpi"><div class="label">2026年4月 総生徒数</div><div class="val" style="color:var(--purple)">${latest.total}名</div><div class="sub">学年別データ有効期間内</div></div>
+  <div class="kpi"><div class="label">小学生</div><div class="val" style="color:var(--el)">${latestEl}名</div><div class="sub">構成比 ${elPct}%</div></div>
+  <div class="kpi"><div class="label">中学生</div><div class="val" style="color:var(--jh)">${latestJh}名</div><div class="sub">構成比 ${jhPct}%</div></div>
+  <div class="kpi"><div class="label">高校生</div><div class="val" style="color:var(--hs)">${latestHs}名</div><div class="sub">構成比 ${hsPct}%</div></div>
+  <div class="kpi"><div class="label">最多学年</div><div class="val" style="color:var(--cyan)">${topGrade[0]} ${topGrade[1]}名</div><div class="sub">全体の${(topGrade[1]/latest.total*100).toFixed(0)}%</div></div>
+  <div class="kpi"><div class="label">学年数</div><div class="val" style="color:var(--pink)">${Object.keys(latest.grades).length}学年</div><div class="sub">在籍学年の広がり</div></div>
+`;
+
+// ========== Stacked Area Chart ==========
+let areaChart;
+const areaViews = ['all','el','jh','hs'];
+const areaViewLabels = {all:'全学年',el:'小学生',jh:'中学生',hs:'高校生'};
+let currentAreaView = 'all';
+
+function getAreaGrades(view) {
+  if (view === 'el') return allGrades.filter(g => g.startsWith('小'));
+  if (view === 'jh') return allGrades.filter(g => g.startsWith('中'));
+  if (view === 'hs') return allGrades.filter(g => g.startsWith('高'));
+  return allGrades;
+}
+
+function buildAreaTabs() {
+  const row = document.getElementById('areaTabRow');
+  row.innerHTML = areaViews.map(v =>
+    `<button class="tab-pill ${v===currentAreaView?'active':''}" onclick="switchAreaView('${v}')">${areaViewLabels[v]}</button>`
+  ).join('');
+}
+
+function renderAreaChart() {
+  const grades = getAreaGrades(currentAreaView);
+  const datasets = grades.filter(g => {
+    return sortedYMs.some(ym => getGradeVal(ym, g) > 0);
+  }).map(g => ({
+    label: g,
+    data: sortedYMs.map(ym => getGradeVal(ym, g)),
+    backgroundColor: gradeColors[g] + '88',
+    borderColor: gradeColors[g],
+    borderWidth: 1.5,
+    fill: true,
+    tension: 0.3,
+    pointRadius: 0,
+  }));
+
+  if (areaChart) areaChart.destroy();
+  areaChart = new Chart(document.getElementById('areaChart'), {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, color: '#8b92b0' } },
+        tooltip: { mode: 'index', intersect: false, callbacks: {
+          footer: items => '合計: ' + items.reduce((s,i) => s + i.parsed.y, 0) + '名'
+        }}
+      },
+      scales: {
+        y: { stacked: true, grid: { color: 'rgba(42,48,85,.4)' }, ticks: { callback: v => v + '名' } },
+        x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 8 } } }
+      }
+    }
+  });
+}
+window.switchAreaView = function(v) { currentAreaView = v; buildAreaTabs(); renderAreaChart(); };
+buildAreaTabs();
+renderAreaChart();
+
+// ========== School Level Charts ==========
+const elData = sortedYMs.map(ym => getLevelCount(ym, 'el'));
+const jhData = sortedYMs.map(ym => getLevelCount(ym, 'jh'));
+const hsData = sortedYMs.map(ym => getLevelCount(ym, 'hs'));
+const totalData = sortedYMs.map(ym => gradeData[ym].total);
+
+new Chart(document.getElementById('levelChart'), {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [
+      { label: '小学生', data: elData, backgroundColor: levelColors.el + '99', borderRadius: 3, barPercentage: .7 },
+      { label: '中学生', data: jhData, backgroundColor: levelColors.jh + '99', borderRadius: 3, barPercentage: .7 },
+      { label: '高校生', data: hsData, backgroundColor: levelColors.hs + '99', borderRadius: 3, barPercentage: .7 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, color: '#8b92b0' } },
+      tooltip: { mode: 'index' }
+    },
+    scales: {
+      y: { stacked: true, grid: { color: 'rgba(42,48,85,.4)' }, ticks: { callback: v => v + '名' } },
+      x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 45, font: { size: 7 } } }
+    }
+  }
+});
+
+new Chart(document.getElementById('levelPctChart'), {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      { label: '小学生%', data: sortedYMs.map((ym,i) => totalData[i] > 0 ? +(elData[i]/totalData[i]*100).toFixed(1) : 0), borderColor: levelColors.el, backgroundColor: levelColors.el + '15', fill: true, tension: .3, pointRadius: 2, borderWidth: 2.5 },
+      { label: '中学生%', data: sortedYMs.map((ym,i) => totalData[i] > 0 ? +(jhData[i]/totalData[i]*100).toFixed(1) : 0), borderColor: levelColors.jh, backgroundColor: levelColors.jh + '15', fill: true, tension: .3, pointRadius: 2, borderWidth: 2.5 },
+      { label: '高校生%', data: sortedYMs.map((ym,i) => totalData[i] > 0 ? +(hsData[i]/totalData[i]*100).toFixed(1) : 0), borderColor: levelColors.hs, backgroundColor: levelColors.hs + '15', fill: true, tension: .3, pointRadius: 2, borderWidth: 2.5 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, color: '#8b92b0' } },
+      tooltip: { mode: 'index', callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + '%' } }
+    },
+    scales: {
+      y: { grid: { color: 'rgba(42,48,85,.4)' }, ticks: { callback: v => v + '%' }, min: 0, max: 100 },
+      x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 7 } } }
+    }
+  }
+});
+
+// ========== April Comparison ==========
+const aprilYMs = sortedYMs.filter(ym => gradeData[ym].month === 4);
+const aprilLabels = aprilYMs.map(ym => gradeData[ym].year + '年4月');
+const aprilGrades = allGrades.filter(g => aprilYMs.some(ym => getGradeVal(ym, g) > 0));
+
+new Chart(document.getElementById('aprilChart'), {
+  type: 'bar',
+  data: {
+    labels: aprilLabels,
+    datasets: aprilGrades.map(g => ({
+      label: g,
+      data: aprilYMs.map(ym => getGradeVal(ym, g)),
+      backgroundColor: gradeColors[g] + 'cc',
+      borderRadius: 3,
+      barPercentage: .7,
+    }))
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, color: '#8b92b0' } },
+      tooltip: { mode: 'index', callbacks: {
+        footer: items => '合計: ' + items.reduce((s,i) => s + i.parsed.y, 0) + '名'
+      }}
+    },
+    scales: {
+      y: { stacked: true, grid: { color: 'rgba(42,48,85,.4)' }, ticks: { callback: v => v + '名' } },
+      x: { stacked: true, grid: { display: false } }
+    }
+  }
+});
+
+// April table
+(function(){
+  let headHtml = '<th>学年</th>';
+  aprilYMs.forEach(ym => {
+    headHtml += `<th>${gradeData[ym].year}年4月</th>`;
+  });
+  if (aprilYMs.length >= 2) headHtml += '<th>増減</th>';
+  document.getElementById('aprilHead').innerHTML = headHtml;
+
+  let bodyHtml = '';
+  const displayGrades = [...aprilGrades, '小学生計', '中学生計', '高校生計', '合計'];
+  
+  displayGrades.forEach(g => {
+    const isTotal = g.includes('計') || g === '合計';
+    bodyHtml += `<tr class="${isTotal ? 'highlight-row' : ''}">`;
+    
+    const badge = g.startsWith('小') ? 'grade-el' : g.startsWith('中') ? 'grade-jh' : g.startsWith('高') ? 'grade-hs' : '';
+    bodyHtml += `<td><span class="grade-badge ${badge}">${g}</span></td>`;
+    
+    const vals = aprilYMs.map(ym => {
+      if (g === '小学生計') return getLevelCount(ym, 'el');
+      if (g === '中学生計') return getLevelCount(ym, 'jh');
+      if (g === '高校生計') return getLevelCount(ym, 'hs');
+      if (g === '合計') return gradeData[ym].total;
+      return getGradeVal(ym, g);
+    });
+    
+    vals.forEach(v => { bodyHtml += `<td>${v > 0 ? v + '名' : '—'}</td>`; });
+    
+    if (aprilYMs.length >= 2) {
+      const last = vals[vals.length-1];
+      const prev = vals[vals.length-2];
+      const diff = last - prev;
+      bodyHtml += `<td class="${diff > 0 ? 'up' : diff < 0 ? 'down' : ''}">${diff > 0 ? '+' : ''}${diff}名</td>`;
+    }
+    bodyHtml += '</tr>';
+  });
+  document.getElementById('aprilBody').innerHTML = bodyHtml;
+})();
+
+// ========== Detail Table ==========
+const fyList = [...new Set(sortedYMs.map(ym => gradeData[ym].fy))].sort();
+let currentFy = fyList[fyList.length - 1];
+
+function buildDetailTabs() {
+  document.getElementById('detailTabRow').innerHTML = fyList.map(fy =>
+    `<button class="tab-pill ${fy===currentFy?'active':''}" onclick="switchDetailFy(${fy})">${fy}年度</button>`
+  ).join('');
+}
+
+function renderDetailTable() {
+  const fyYMs = sortedYMs.filter(ym => gradeData[ym].fy === currentFy);
+  const gradesInFy = allGrades.filter(g => fyYMs.some(ym => getGradeVal(ym, g) > 0));
+  
+  let headHtml = '<th>月</th>';
+  gradesInFy.forEach(g => {
+    const badge = g.startsWith('小') ? 'grade-el' : g.startsWith('中') ? 'grade-jh' : 'grade-hs';
+    headHtml += `<th><span class="grade-badge ${badge}">${g}</span></th>`;
+  });
+  headHtml += '<th>合計</th><th>小計</th><th>中計</th><th>高計</th>';
+  document.getElementById('detailHead').innerHTML = headHtml;
+  
+  let bodyHtml = '';
+  fyYMs.forEach(ym => {
+    const d = gradeData[ym];
+    bodyHtml += '<tr>';
+    bodyHtml += `<td>${d.year}/${String(d.month).padStart(2,'0')}</td>`;
+    gradesInFy.forEach(g => {
+      const v = getGradeVal(ym, g);
+      bodyHtml += `<td>${v > 0 ? v : '—'}</td>`;
+    });
+    bodyHtml += `<td style="font-weight:700">${d.total}</td>`;
+    bodyHtml += `<td style="color:var(--el)">${getLevelCount(ym,'el')}</td>`;
+    bodyHtml += `<td style="color:var(--jh)">${getLevelCount(ym,'jh')}</td>`;
+    bodyHtml += `<td style="color:var(--hs)">${getLevelCount(ym,'hs')}</td>`;
+    bodyHtml += '</tr>';
+  });
+  document.getElementById('detailBody').innerHTML = bodyHtml;
+}
+
+window.switchDetailFy = function(fy) { currentFy = fy; buildDetailTabs(); renderDetailTable(); };
+buildDetailTabs();
+renderDetailTable();
+
+// ========== Insights ==========
+(function(){
+  // Calculate key metrics for insights
+  const apr2024 = gradeData['202404'];
+  const apr2025 = gradeData['202504'];
+  const apr2026 = gradeData['202604'];
+  
+  // HS dependency
+  const hsPct2024 = apr2024 ? ((apr2024.grades['高1']||0)+(apr2024.grades['高2']||0)+(apr2024.grades['高3']||0))/apr2024.total*100 : 0;
+  const hsPct2025 = apr2025 ? ((apr2025.grades['高1']||0)+(apr2025.grades['高2']||0)+(apr2025.grades['高3']||0))/apr2025.total*100 : 0;
+  const hsPct2026 = apr2026 ? ((apr2026.grades['高1']||0)+(apr2026.grades['高2']||0)+(apr2026.grades['高3']||0))/apr2026.total*100 : 0;
+  
+  // JH composition
+  const jhPct2024 = apr2024 ? ((apr2024.grades['中1']||0)+(apr2024.grades['中2']||0)+(apr2024.grades['中3']||0))/apr2024.total*100 : 0;
+  const jhPct2025 = apr2025 ? ((apr2025.grades['中1']||0)+(apr2025.grades['中2']||0)+(apr2025.grades['中3']||0))/apr2025.total*100 : 0;
+  const jhPct2026 = apr2026 ? ((apr2026.grades['中1']||0)+(apr2026.grades['中2']||0)+(apr2026.grades['中3']||0))/apr2026.total*100 : 0;
+  
+  // H3 count progression
+  const h3_2024 = apr2024?.grades['高3'] || 0;
+  const h3_2025 = apr2025?.grades['高3'] || 0;
+  const h3_2026 = apr2026?.grades['高3'] || 0;
+  
+  // Elementary
+  const elPct2024 = apr2024 ? getLevelCount('202404','el')/apr2024.total*100 : 0;
+  const elPct2025 = apr2025 ? getLevelCount('202504','el')/apr2025.total*100 : 0;
+  const elPct2026 = apr2026 ? getLevelCount('202604','el')/apr2026.total*100 : 0;
+  
+  // JH1 = future pipeline
+  const jh1_2024 = apr2024?.grades['中1'] || 0;
+  const jh1_2025 = apr2025?.grades['中1'] || 0;
+  const jh1_2026 = apr2026?.grades['中1'] || 0;
+  
+  document.getElementById('insightGrid').innerHTML = `
+    <div class="insight ${hsPct2026 > 50 ? 'warn' : 'info'}">
+      <h4>🎓 高校生依存度の変化</h4>
+      <p>高校生比率: <span class="hl num">${hsPct2024.toFixed(0)}%</span>（2024/04）→ <span class="hl num">${hsPct2025.toFixed(0)}%</span>（2025/04）→ <span class="hl num">${hsPct2026.toFixed(0)}%</span>（2026/04）</p>
+      <ul>
+        <li>2026年4月は高3が<span class="hl">${h3_2026}名</span>と過去最多。年度末の卒業で大幅減のリスク</li>
+        <li>高校生比率${hsPct2026.toFixed(0)}%は${hsPct2026 > 50 ? '過半数を超え、卒業時の影響が大きい' : '健全な範囲'}</li>
+        <li>高3の${h3_2026}名が3月に卒業すると、約${(h3_2026/apr2026.total*100).toFixed(0)}%の減少要因に</li>
+      </ul>
+    </div>
+    
+    <div class="insight ${jh1_2026 > jh1_2025 ? 'good' : 'danger'}">
+      <h4>📈 中1の新規獲得（将来パイプライン）</h4>
+      <p>中1人数: <span class="hl num">${jh1_2024}名</span>（2024/04）→ <span class="hl num">${jh1_2025}名</span>（2025/04）→ <span class="hl num">${jh1_2026}名</span>（2026/04）</p>
+      <ul>
+        <li>${jh1_2026 > jh1_2025 ? '前年比+' + (jh1_2026-jh1_2025) + '名の増加。中学入学時の獲得は成功' : '前年比' + (jh1_2026-jh1_2025) + '名。中学入学時の獲得を強化すべき'}</li>
+        <li>中1は塾選びの最重要タイミング。ここでの獲得が3年間の在籍に直結</li>
+        <li>2026/04の中1は<span class="hl">${jh1_2026}名</span>で${jh1_2026 >= 6 ? '健全な水準' : '要改善'}</li>
+      </ul>
+    </div>
+    
+    <div class="insight strategy">
+      <h4>🔄 学年構成の「逆三角形」構造</h4>
+      <p>2026年4月時点: <span class="grade-badge grade-hs">高校生 ${latestHs}名（${hsPct}%）</span> <span class="grade-badge grade-jh">中学生 ${latestJh}名（${jhPct}%）</span> <span class="grade-badge grade-el">小学生 ${latestEl}名（${elPct}%）</span></p>
+      <ul>
+        <li>上位学年ほど人数が多い「逆三角形」構造は、卒業による自然減リスクが高い</li>
+        <li>理想的には中学生が最も多い「ダイヤモンド型」が安定成長の基盤</li>
+        <li>小学生の獲得を強化し、下から支える構造に転換する必要あり</li>
+      </ul>
+    </div>
+    
+    <div class="insight ${elPct2026 < 10 ? 'danger' : 'warn'}">
+      <h4>⚠️ 小学生比率の低下</h4>
+      <p>小学生比率: <span class="hl num">${elPct2024.toFixed(0)}%</span>（2024/04）→ <span class="hl num">${elPct2025.toFixed(0)}%</span>（2025/04）→ <span class="hl num">${elPct2026.toFixed(0)}%</span>（2026/04）</p>
+      <ul>
+        <li>小学生は将来の中学・高校への内部進級の源泉</li>
+        <li>${elPct2026 < 5 ? '小学生がほぼ不在。中学からの新規獲得に完全依存する構造' : '小学生比率は低い水準。英語教育の早期化などを活用すべき'}</li>
+        <li>小学校高学年向けの「中学準備講座」で早期接点を創出する戦略が有効</li>
+      </ul>
+    </div>
+    
+    <div class="insight neutral">
+      <h4>📊 中3→卒業→高1の接続率</h4>
+      <p>各年度3月の中3 → 翌4月の高1の数が内部進級率の指標</p>
+      <ul>
+        <li>2024/03 中3 <span class="hl">${(gradeData['202403']?.grades?.['中3'])||'?'}名</span> → 2024/04 高1 <span class="hl">${apr2024?.grades?.['高1']||'?'}名</span>（接続率: ${((apr2024?.grades?.['高1']||0)/((gradeData['202403']?.grades?.['中3'])||1)*100).toFixed(0)}%）</li>
+        <li>2025/03 中3 <span class="hl">${(gradeData['202503']?.grades?.['中3'])||'?'}名</span> → 2025/04 高1 <span class="hl">${apr2025?.grades?.['高1']||'?'}名</span>（接続率: ${((apr2025?.grades?.['高1']||0)/((gradeData['202503']?.grades?.['中3'])||1)*100).toFixed(0)}%）</li>
+        <li>2026/03 中3 <span class="hl">${(gradeData['202603']?.grades?.['中3'])||'?'}名</span> → 2026/04 高1 <span class="hl">${apr2026?.grades?.['高1']||'?'}名</span>（接続率: ${((apr2026?.grades?.['高1']||0)/((gradeData['202603']?.grades?.['中3'])||1)*100).toFixed(0)}%）</li>
+        <li>接続率向上が高校生の安定確保のカギ</li>
+      </ul>
+    </div>
+    
+    <div class="insight good">
+      <h4>🎯 構成改善のための戦略提案</h4>
+      <p>現状の逆三角形構造を改善するためのアクションプラン:</p>
+      <ul>
+        <li><strong>小学生獲得:</strong> 英検対策・プログラミングなど小学生向け新コースの開設</li>
+        <li><strong>中1獲得の最大化:</strong> 近隣小学校6年生への春期キャンペーン強化</li>
+        <li><strong>中3→高1接続:</strong> 高校進学後の継続率を上げるため、進路指導の充実と高校講座の魅力強化</li>
+        <li><strong>退塾防止:</strong> 各学年で定期面談を実施し、生徒・保護者の満足度を把握</li>
+      </ul>
+    </div>
+  `;
+})();
+</script>
+</body>
+</html>
